@@ -4,11 +4,9 @@ CREATE DATABASE tjournal;
 
 
 
-
-
 CREATE TABLE tjournal.`EXCP`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -21,11 +19,9 @@ CREATE TABLE tjournal.`EXCP`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`EXCPCNTX`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -38,11 +34,9 @@ CREATE TABLE tjournal.`EXCPCNTX`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`SCALL`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -60,11 +54,9 @@ CREATE TABLE tjournal.`SCALL`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`CONN`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -76,11 +68,9 @@ CREATE TABLE tjournal.`CONN`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`ATTN`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -93,11 +83,9 @@ CREATE TABLE tjournal.`ATTN`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`CALL`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -121,11 +109,9 @@ CREATE TABLE tjournal.`CALL`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`ADMIN`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -145,11 +131,9 @@ CREATE TABLE tjournal.`ADMIN`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`CLSTR`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -166,11 +150,9 @@ CREATE TABLE tjournal.`CLSTR`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`Context`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -186,11 +168,9 @@ CREATE TABLE tjournal.`Context`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`SESN`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -210,11 +190,9 @@ CREATE TABLE tjournal.`SESN`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`SRVC`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -230,11 +208,9 @@ CREATE TABLE tjournal.`SRVC`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`FTEXTUpd`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -253,11 +229,9 @@ CREATE TABLE tjournal.`FTEXTUpd`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`FTS`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -278,11 +252,9 @@ CREATE TABLE tjournal.`FTS`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`EVENTLOG`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -296,11 +268,9 @@ CREATE TABLE tjournal.`EVENTLOG`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`SDGC`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -319,11 +289,9 @@ CREATE TABLE tjournal.`SDGC`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`HASP`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -336,11 +304,9 @@ CREATE TABLE tjournal.`HASP`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`LIC`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -355,11 +321,9 @@ CREATE TABLE tjournal.`LIC`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`SDBL`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -383,11 +347,9 @@ CREATE TABLE tjournal.`SDBL`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`DBMSSQL`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -414,11 +376,9 @@ CREATE TABLE tjournal.`DBMSSQL`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`VRSREQUEST`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -438,11 +398,9 @@ CREATE TABLE tjournal.`VRSREQUEST`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`VRSRESPONSE`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -462,11 +420,9 @@ CREATE TABLE tjournal.`VRSRESPONSE`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`TLOCK`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -490,11 +446,9 @@ CREATE TABLE tjournal.`TLOCK`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`SCOM`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -507,11 +461,9 @@ CREATE TABLE tjournal.`SCOM`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`DBMSSQLCONN`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -531,11 +483,9 @@ CREATE TABLE tjournal.`DBMSSQLCONN`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`QERR`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -557,11 +507,9 @@ CREATE TABLE tjournal.`QERR`(
 ORDER BY (ts);
 
 
-
-
 CREATE TABLE tjournal.`ADDIN`(
 `host` String,
-`ts` DateTime64(6,'Europe/Moscow'),
+`ts` DateTime64(6,'UTC'),
 `duration` String,
 `name` String,
 `depth` String,
@@ -588,4 +536,4 @@ ORDER BY (ts);
 
 
 
--- ALL TABLES = ['LIC', 'QERR', 'TLOCK', 'DBMSSQL', 'EXCP', 'SCOM', 'ATTN', 'CALL', 'SCALL', 'VRSRESPONSE', 'EVENTLOG', 'EXCPCNTX', 'SRVC', 'SDGC', 'FTEXTUpd', 'HASP', 'SESN', 'CONN', 'ADDIN', 'SDBL', 'VRSREQUEST', 'ADMIN', 'DBMSSQLCONN', 'FTS', 'Context', 'CLSTR']
+-- ALL TABLES = ['ADMIN', 'CONN', 'DBMSSQLCONN', 'EVENTLOG', 'SCOM', 'SCALL', 'QERR', 'FTEXTUpd', 'TLOCK', 'CALL', 'EXCPCNTX', 'CLSTR', 'ATTN', 'EXCP', 'VRSREQUEST', 'SDBL', 'VRSRESPONSE', 'SRVC', 'LIC', 'ADDIN', 'DBMSSQL', 'SESN', 'HASP', 'FTS', 'Context', 'SDGC']

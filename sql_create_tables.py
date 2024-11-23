@@ -25,7 +25,7 @@ def get_db_type(v):
         return 'Float64'
     elif type(v) == str:
         if is_datetime(v):
-            return "DateTime64(6,'Europe/Moscow')"
+            return "DateTime64(6,'UTC')"
         else:
             return 'String'
 
@@ -54,7 +54,7 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
                 continue
             else:
                 set_names.add(name)
-            print('-- ' + l)
+            # print('-- ' + l)
             print(f'CREATE TABLE tjournal.`{name}`(')
             print('`host` String,')
 
