@@ -1,0 +1,49 @@
+sources:
+  input_logs:
+    type: file
+    include:
+      - /var/log/logtj/**/*.log
+    data_dir: /var/lib/vector
+    fingerprint:
+      strategy: device_and_inode
+
+transforms:
+  remap_logs:
+    inputs:
+      - input_logs
+    type: remap
+    file: /etc/vector/transforms/parseLog.vrl
+
+  add_context_event:
+    inputs:
+      - remap_logs
+    type: reduce
+    starts_when:
+      type: vrl
+      source: .name != "Context"
+
+
+  filter_EVENT_LIST:
+    inputs:
+      - add_context_event
+    type: filter
+    condition: includes(split("${EVENT_LIST}", ","), to_string!(.name))
+
+sinks:
+  clickhouse:
+    type: clickhouse
+    inputs:
+      - filter_EVENT_LIST
+    endpoint: ${CLICKHOUSE_SERVER}
+    auth:
+      strategy: basic
+      user: ${CLICKHOUSE_USER}
+      password: ${CLICKHOUSE_PASSWORD}
+    database: ${CLICKHOUSE_DATABASE}
+    table: "{{ .name }}"
+    skip_unknown_fields: true
+    batch:
+      max_events: 10000
+      timeout_secs: 5
+    acknowledgements:
+      enabled: true

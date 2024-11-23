@@ -1,0 +1,10 @@
+CLICKHOUSE_USER=chuser
+CLICKHOUSE_PASSWORD=aAAaaaAAAaaa
+CLICKHOUSE_DATABASE=tjournal
+CLICKHOUSE_SERVER=click_house:8123  ## click_house - это имя доступно только из докера
+CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS=1  #   БД при каждом запуска обнуляется
+
+
+EVENT_LIST="EXCP,EXCPCNTX,TLOCK,TTIMEOUT,SDBL,QERR,SCALL,CALL,Context"
+#EVENT_LIST="SESN"
+#EVENT_LIST="SCALL,EXCP"

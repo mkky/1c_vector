@@ -1,0 +1,13 @@
+. = parse_json!(.message)
+.host = get_hostname!()
+
+
+#  t:clientID -->  clientid
+. = map_keys(.) -> |key| { downcase(key) }
+. = map_keys(.) -> |key| { replace(key, r'[a-z]+:', "") }
+
+
+
+
+
+
