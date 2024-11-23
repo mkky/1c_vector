@@ -1,6 +1,7 @@
+file = .file
 . = parse_json!(.message)
 .host = get_hostname!()
-
+.file = file
 
 #  t:clientID -->  clientid
 . = map_keys(.) -> |key| { downcase(key) }
@@ -8,6 +9,42 @@
 
 
 
+if is_null(.duration)==false {
+  .duration  = to_int!(.duration)
+}
+
+if is_null(.depth)==false {
+  .depth = to_int!(.depth)
+}
+
+if is_null(.callwait)==false {
+  .callwait = to_int!(.callwait)
+}
+
+if is_null(.memory)==false {
+  .memory = to_int!(.memory)
+}
+if is_null(.memorypeak)==false {
+  .memorypeak = to_int!(.memorypeak)
+}
+if is_null(.inbytes)==false {
+  .inbytes = to_int!(.inbytes)
+}
+if is_null(.outbytes)==false {
+  .outbytes = to_int!(.outbytes)
+}
+if is_null(.cputime)==false {
+  .cputime = to_int!(.cputime)
+}
+if is_null(.trans)==false {
+  .trans = to_int!(.trans)
+}
+if is_null(.rows)==false {
+  .rows = to_int!(.rows)
+}
+if is_null(.rowsaffected)==false {
+  .rowsaffected = to_int!(.rowsaffected)
+}
 
 
 

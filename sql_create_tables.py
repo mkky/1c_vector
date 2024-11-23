@@ -13,6 +13,7 @@ CREATE_ONLY_THIS_TABLES = [
     'CONN','SCALL', 'TLOCK', 'CALL', 'EXCPCNTX', 'EXCP', 'DBMSSQL', 'TTIMEOUT', 'SDBL', 'QERR'
 ]
 set_names = set()
+int_cols = set()
 
 def is_datetime(s):
     from datetime import datetime as dt
@@ -22,15 +23,30 @@ def is_datetime(s):
         return False
     return True
 
+def is_int(s):
+    try:
+        int(s)
+    except Exception as e:
+        return False
+    return True
 
-def get_db_type(v):
+Int32_COLUMNS = ['duration', 'depth', 'callwait', 'memory', 'memorypeak', 'inbytes', 'outbytes', 'cputime', 'trans', 'rows', 'rowsaffected']
+def get_db_type(column_name ,v):
+
+    if column_name in Int32_COLUMNS:
+        return 'Int32'
+
     if type(v) == int:
         return 'Int32'
     elif type(v) == float:
-        return 'Float64'
+        return 'Float6  4'
     elif type(v) == str:
         if is_datetime(v):
             return "DateTime64(6,'UTC')"
+
+        # elif is_int(v):
+        #     return 'Int32'
+
         else:
             return 'String'
 
@@ -65,13 +81,21 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
 
             # print('-- ' + l)
             print(f'CREATE TABLE tjournal.`{name}`(')
-            print('`host` String,')
+            # print('`host` String,')
+            # print('`context` String,')
+            # print('`file` String,')
+
+            json_line['host'] = 'string'
+            json_line['Context'] = 'string'
+            json_line['file'] = 'string'
 
             for k, v in json_line.items():
 
                 column_name = k.lower().replace('t:', '')
                 column_name = re.sub('[a-z]+:', "", k.lower())
-                db_type = get_db_type(v)
+
+                db_type = get_db_type(column_name, v)
+
 
                 if db_type:
                     print(f'`{column_name}` {db_type},')
