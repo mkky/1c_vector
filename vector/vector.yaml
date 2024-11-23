@@ -47,3 +47,14 @@ sinks:
       timeout_secs: 5
     acknowledgements:
       enabled: true
+
+#  Пишем данные, которую фильтруются в БД еще и в json файлы в ./tmp/
+#
+#  json_log_to_tmp_folder:
+#    type: file
+#    inputs:
+#      - filter_EVENT_LIST
+#    compression: none
+#    path: /tmp/%Y_%m_%d__%H_%M.json
+#    encoding:
+#      codec: json
