@@ -8,43 +8,16 @@ file = .file
 . = map_keys(.) -> |key| { replace(key, r'[a-z]+:', "") }
 
 
+# int_cols =split(get_env_var!("INT_COLUMNS"), ",")
+int_cols =["depth", "duration", "callwait", "memory", "memorypeak", "inbytes", "outbytes", "cputime", "trans", "rows", "rowsaffected", "osthread", "clientid", "connectid", "sessionid", "waitconnections", "dbpid", "callid"]
 
-if is_null(.duration)==false {
-  .duration  = to_int!(.duration)
-}
-
-if is_null(.depth)==false {
-  .depth = to_int!(.depth)
-}
-
-if is_null(.callwait)==false {
-  .callwait = to_int!(.callwait)
+for_each(.) -> |key, value| {
+    if includes(int_cols, key) {
+        . = set!(., [key], to_int!(value))
+    }
 }
 
-if is_null(.memory)==false {
-  .memory = to_int!(.memory)
-}
-if is_null(.memorypeak)==false {
-  .memorypeak = to_int!(.memorypeak)
-}
-if is_null(.inbytes)==false {
-  .inbytes = to_int!(.inbytes)
-}
-if is_null(.outbytes)==false {
-  .outbytes = to_int!(.outbytes)
-}
-if is_null(.cputime)==false {
-  .cputime = to_int!(.cputime)
-}
-if is_null(.trans)==false {
-  .trans = to_int!(.trans)
-}
-if is_null(.rows)==false {
-  .rows = to_int!(.rows)
-}
-if is_null(.rowsaffected)==false {
-  .rowsaffected = to_int!(.rowsaffected)
-}
+
 
 
 

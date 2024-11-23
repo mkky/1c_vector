@@ -1,20 +1,38 @@
 import json
 import glob
 import re
+import os
 
 # LOGS_FILES_PATTERN = "./logs/*/*.log"
 
-#Читаются все эти логи, и для каждой первой строки с уникальным name создаётся таблица name
-LOGS_FILES_PATTERN = "C:\\Users\\User\\Downloads\\TJ_1C\\TJ_LOGS\\**\\*.log"
+# Читаются все эти логи, и для каждой первой строки с уникальным name создаётся таблица name
+
+import sys
+
+if len(sys.argv) == 2:
+    LOG_PATH = sys.argv[1]
+else:
+    LOG_PATH = "/mnt/c/Users/User/Downloads/TJ_1C/TJ_LOGS/"
+
+LOGS_FILES_PATTERN = LOG_PATH + "**/*.log"
 
 ## ['ADMIN', 'CONN', 'DBMSSQLCONN', 'EVENTLOG', 'SCOM', 'SCALL', 'QERR', 'FTEXTUpd', 'TLOCK', 'CALL', 'EXCPCNTX', 'CLSTR', 'ATTN', 'EXCP', 'VRSREQUEST', 'SDBL', 'VRSRESPONSE', 'SRVC', 'LIC', 'ADDIN', 'DBMSSQL', 'SESN', 'HASP', 'FTS', 'Context', 'SDGC']
 
-CREATE_ONLY_THIS_TABLES = [
-    'CONN','SCALL', 'TLOCK', 'CALL', 'EXCPCNTX', 'EXCP', 'DBMSSQL', 'TTIMEOUT', 'SDBL', 'QERR'
-]
-CREATE_ONLY_THIS_TABLES = None
+
+if 'EVENT_LIST' in os.environ:
+    CREATE_ONLY_THIS_TABLES = os.environ['EVENT_LIST'].split(',')
+else:
+    CREATE_ONLY_THIS_TABLES = None
+
+if 'INT_COLUMNS' in os.environ:
+    Int32_COLUMNS = os.environ['INT_COLUMNS'].split(',')
+else:
+    Int32_COLUMNS = ['duration', 'depth', 'callwait', 'memory', 'memorypeak', 'inbytes', 'outbytes', 'cputime', 'trans',
+                     'rows', 'rowsaffected']
+
 set_names = set()
 int_cols = set()
+
 
 def is_datetime(s):
     from datetime import datetime as dt
@@ -24,6 +42,7 @@ def is_datetime(s):
         return False
     return True
 
+
 def is_int(s):
     try:
         int(s)
@@ -31,9 +50,8 @@ def is_int(s):
         return False
     return True
 
-Int32_COLUMNS = ['duration', 'depth', 'callwait', 'memory', 'memorypeak', 'inbytes', 'outbytes', 'cputime', 'trans', 'rows', 'rowsaffected']
-def get_db_type(column_name ,v):
 
+def get_db_type(column_name, v):
     if column_name in Int32_COLUMNS:
         return 'Int32'
 
@@ -43,7 +61,7 @@ def get_db_type(column_name ,v):
         return 'Float6  4'
     elif type(v) == str:
         if is_datetime(v):
-            return "DateTime64(6,'UTC')"
+            return "DateTime64(6,'Europe/Moscow')"
 
         # elif is_int(v):
         #     return 'Int32'
@@ -57,6 +75,9 @@ def get_db_type(column_name ,v):
 print('DROP DATABASE IF EXISTS tjournal;')
 print('CREATE DATABASE tjournal;\n\n\n\n')
 
+from collections import defaultdict
+
+columns = defaultdict(dict)
 
 for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
 
@@ -72,45 +93,40 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
 
             name = json_line['name']
 
-            if name in set_names:
-                continue
-            else:
-                set_names.add(name)
-
-            if CREATE_ONLY_THIS_TABLES:
-                if name not in CREATE_ONLY_THIS_TABLES:
-                    continue
-
-
-            if name == 'Context':
-                continue
-
-
-            # print('-- ' + l)
-            print(f'CREATE TABLE tjournal.`{name}`(')
-            # print('`host` String,')
-            # print('`context` String,')
-            # print('`file` String,')
-
-            json_line['host'] = 'string'
-            json_line['Context'] = 'string'
-            json_line['file'] = 'string'
-
             for k, v in json_line.items():
+                k = re.sub('[a-z]+:', "", k.lower())
+                columns[name][k] = v
 
-                column_name = k.lower().replace('t:', '')
-                column_name = re.sub('[a-z]+:', "", k.lower())
-
-                db_type = get_db_type(column_name, v)
-
-
-                if db_type:
-                    print(f'`{column_name}` {db_type},')
-
-            print(''') ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);\n\n''')
-            # break
         else:
             break
 
-print('\n\n\n-- ALL EVENTS = {}'.format(list(set_names)))
+for name, json_line in columns.items():
+
+    if CREATE_ONLY_THIS_TABLES:
+        if name not in CREATE_ONLY_THIS_TABLES:
+            continue
+
+    if name == 'Context':
+        continue
+
+    # print('-- ' + l)
+    print(f'CREATE TABLE tjournal.`{name}`(')
+    # print('`host` String,')
+    # print('`context` String,')
+    # print('`file` String,')
+
+    json_line['host'] = 'string'
+    json_line['context'] = 'string'
+    json_line['file'] = 'string'
+
+    for k, v in json_line.items():
+
+        db_type = get_db_type(k, v)
+
+        if db_type:
+            print(f'`{k}` {db_type},')
+
+    print(''') ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
+ORDER BY (ts);\n\n''')
+
+print('\n\n\n-- ALL EVENTS = {}'.format(list(columns.keys())))

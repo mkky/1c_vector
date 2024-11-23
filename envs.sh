@@ -1,10 +1,10 @@
-CLICKHOUSE_USER=chuser
-CLICKHOUSE_PASSWORD=aAAaaaAAAaaa
-CLICKHOUSE_DATABASE=tjournal
-CLICKHOUSE_SERVER=click_house:8123  ## click_house - это имя доступно только из докера
-CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS=1  #   БД при каждом запуска обнуляется
+export CLICKHOUSE_USER=chuser
+export CLICKHOUSE_PASSWORD=aAAaaaAAAaaa
+export CLICKHOUSE_DATABASE=tjournal
+export CLICKHOUSE_SERVER=click_house:8123  ## click_house - это имя доступно только из докера
+export CLICKHOUSE_ALWAYS_RUN_INITDB_SCRIPTS=1  #   БД при каждом запуска обнуляется
 
+export INT_COLUMNS="depth,duration,callwait,memory,memorypeak,inbytes,outbytes,cputime,trans,rows,rowsaffected,osthread,clientid,connectid,sessionid,waitconnections,dbpid,callid"
+#export EVENT_LIST="EXCP,EXCPCNTX,TLOCK,TTIMEOUT,SDBL,QERR,SCALL,CALL"
+export EVENT_LIST="TTIMEOUT,TDEADLOCK,ADMIN,CONN,FTEXTUpd,CLSTR,ADDIN,TLOCK,VRSREQUEST,LIC,QERR,ATTN,SCOM,CALL,SRVC,EXCP,HASP,DBMSSQLCONN,DBMSSQL,EXCPCNTX,SCALL,SDBL,EVENTLOG,VRSRESPONSE,SDGC,SESN,FTS,DBPOSTGRS"
 
-EVENT_LIST="EXCP,EXCPCNTX,TLOCK,TTIMEOUT,SDBL,QERR,SCALL,CALL,Context"
-#EVENT_LIST="SESN"
-#EVENT_LIST="SCALL,EXCP"
