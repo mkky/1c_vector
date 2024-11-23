@@ -622,5 +622,37 @@ ORDER BY (ts);
 
 
 
+CREATE TABLE tjournal.`TDEADLOCK`(
+`ts` DateTime64(6,'UTC'),
+`duration` Int32,
+`name` String,
+`level` String,
+`process` String,
+`processid` String,
+`processname` String,
+`osthread` String,
+`clientid` String,
+`applicationname` String,
+`computername` String,
+`connectid` String,
+`sessionid` String,
+`usr` String,
+`appid` String,
+`dbms` String,
+`database` String,
+`trans` Int32,
+`dbpid` String,
+`sql` String,
+`rowsaffected` Int32,
+`result` String,
+`context` String,
+`host` String,
+`file` String,
+) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
+ORDER BY (ts);
 
--- ALL EVENTS = ['ADDIN', 'TTIMEOUT', 'VRSRESPONSE', 'VRSREQUEST', 'EXCP', 'SCOM', 'QERR', 'ATTN', 'CLSTR', 'DBPOSTGRS', 'SDBL', 'CONN', 'SDGC', 'HASP', 'ADMIN', 'LIC', 'DBMSSQL', 'SRVC', 'SCALL', 'SESN', 'FTEXTUpd', 'TLOCK', 'DBMSSQLCONN', 'Context', 'CALL', 'FTS', 'EVENTLOG', 'EXCPCNTX']
+
+
+
+
+-- ALL EVENTS = ['FTS', 'SDBL', 'EXCP', 'LIC', 'FTEXTUpd', 'SCALL', 'CLSTR', 'QERR', 'SRVC', 'CALL', 'VRSRESPONSE', 'CONN', 'EVENTLOG', 'DBMSSQL', 'SCOM', 'EXCPCNTX', 'Context', 'SESN', 'DBPOSTGRS', 'ADMIN', 'TTIMEOUT', 'VRSREQUEST', 'HASP', 'TLOCK', 'ATTN', 'ADDIN', 'SDGC', 'DBMSSQLCONN']
