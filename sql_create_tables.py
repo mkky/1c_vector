@@ -7,6 +7,11 @@ import re
 #Читаются все эти логи, и для каждой первой строки с уникальным name создаётся таблица name
 LOGS_FILES_PATTERN = "C:\\Users\\User\\Downloads\\TJ_1C\\TJ_LOGS\\**\\*.log"
 
+## ['ADMIN', 'CONN', 'DBMSSQLCONN', 'EVENTLOG', 'SCOM', 'SCALL', 'QERR', 'FTEXTUpd', 'TLOCK', 'CALL', 'EXCPCNTX', 'CLSTR', 'ATTN', 'EXCP', 'VRSREQUEST', 'SDBL', 'VRSRESPONSE', 'SRVC', 'LIC', 'ADDIN', 'DBMSSQL', 'SESN', 'HASP', 'FTS', 'Context', 'SDGC']
+
+CREATE_ONLY_THIS_TABLES = [
+    'CONN','SCALL', 'TLOCK', 'CALL', 'EXCPCNTX', 'EXCP', 'DBMSSQL', 'TTIMEOUT', 'SDBL', 'QERR'
+]
 set_names = set()
 
 def is_datetime(s):
@@ -54,6 +59,10 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
                 continue
             else:
                 set_names.add(name)
+
+            if name not in CREATE_ONLY_THIS_TABLES:
+                continue
+
             # print('-- ' + l)
             print(f'CREATE TABLE tjournal.`{name}`(')
             print('`host` String,')
@@ -73,4 +82,4 @@ ORDER BY (ts);\n\n''')
         else:
             break
 
-print('\n\n\n-- ALL TABLES = {}'.format(list(set_names)))
+print('\n\n\n-- ALL EVENTS = {}'.format(list(set_names)))
