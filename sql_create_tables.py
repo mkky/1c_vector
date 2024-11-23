@@ -12,6 +12,7 @@ LOGS_FILES_PATTERN = "C:\\Users\\User\\Downloads\\TJ_1C\\TJ_LOGS\\**\\*.log"
 CREATE_ONLY_THIS_TABLES = [
     'CONN','SCALL', 'TLOCK', 'CALL', 'EXCPCNTX', 'EXCP', 'DBMSSQL', 'TTIMEOUT', 'SDBL', 'QERR'
 ]
+CREATE_ONLY_THIS_TABLES = None
 set_names = set()
 int_cols = set()
 
@@ -76,8 +77,14 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
             else:
                 set_names.add(name)
 
-            if name not in CREATE_ONLY_THIS_TABLES:
+            if CREATE_ONLY_THIS_TABLES:
+                if name not in CREATE_ONLY_THIS_TABLES:
+                    continue
+
+
+            if name == 'Context':
                 continue
+
 
             # print('-- ' + l)
             print(f'CREATE TABLE tjournal.`{name}`(')
