@@ -8,8 +8,13 @@ file = .file
 . = map_keys(.) -> |key| { replace(key, r'[a-z]+:', "") }
 
 
-# int_cols =split(get_env_var!("INT_COLUMNS"), ",")
-int_cols =["depth", "duration", "callwait", "memory", "memorypeak", "inbytes", "outbytes", "cputime", "trans", "rows", "rowsaffected", "osthread", "clientid", "connectid", "sessionid", "waitconnections", "dbpid", "callid"]
+# преобразуем ts из local в Moscow tz
+ts_format = "%Y-%m-%dT%H:%M:%S.%6f"
+.ts = format_timestamp!(parse_timestamp!(.ts,  format: ts_format), ts_format, timezone:"Europe/Moscow")
+
+
+int_cols =split(get_env_var!("INT_COLUMNS"), ",")
+#int_cols =["depth", "duration", "callwait", "memory", "memorypeak", "inbytes", "outbytes", "cputime", "trans", "rows", "rowsaffected", "osthread", "clientid", "connectid", "sessionid", "waitconnections", "dbpid", "callid"]
 
 for_each(.) -> |key, value| {
     if includes(int_cols, key) {

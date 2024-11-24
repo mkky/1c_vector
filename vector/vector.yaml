@@ -1,3 +1,5 @@
+#timezone: Europe/Moscow
+
 sources:
   input_logs:
     type: file
