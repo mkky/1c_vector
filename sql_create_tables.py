@@ -1,11 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import json
 import glob
 import re
 import os
 
-# LOGS_FILES_PATTERN = "./logs/*/*.log"
-
-# Читаются все эти логи, и для каждой первой строки с уникальным name создаётся таблица name
 
 import sys
 
