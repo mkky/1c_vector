@@ -18,7 +18,7 @@ int_cols =split(get_env_var!("INT_COLUMNS"), ",")
 
 for_each(.) -> |key, value| {
     if includes(int_cols, key) {
-        . = set!(., [key], to_int!(value))
+        . = set!(., [key], to_int(value) ?? null)
     }
 }
 
