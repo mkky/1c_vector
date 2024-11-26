@@ -9,8 +9,28 @@ sources:
     fingerprint:
       strategy: device_and_inode
 
+  lst_file:
+    type: file
+    include:
+      - /var/log/logtj/1CV8Clst.lst
+    data_dir: /var/lib/vector
+    fingerprint:
+      strategy: device_and_inode
+    ignore_checkpoints: true
 
 transforms:
+  filter_db_lines_in_lst:
+    inputs:
+      - lst_file
+    type: filter
+    condition: contains( to_string!(.message), ";DBUID=")
+
+  parse_lst:
+    inputs:
+      - filter_db_lines_in_lst
+    type: remap
+    file: /etc/vector/transforms/parseLst.vrl
+
   remap_logs:
     inputs:
       - input_logs
@@ -37,14 +57,15 @@ sinks:
     type: clickhouse
     inputs:
       - filter_EVENT_LIST
+      - parse_lst
     endpoint: ${CLICKHOUSE_SERVER}
     auth:
       strategy: basic
       user: ${CLICKHOUSE_USER}
       password: ${CLICKHOUSE_PASSWORD}
     database: ${CLICKHOUSE_DATABASE}
-    table: "{{ .name }}"
     skip_unknown_fields: true
+    table: "{{ .name }}"
     batch:
       max_events: 10000
       timeout_secs: 5
@@ -58,6 +79,7 @@ sinks:
     type: file
     inputs:
       - filter_EVENT_LIST
+      - parse_lst
     compression: none
     path: /tmp/%Y_%m_%d__%H_%M.json
     encoding:

@@ -1,5 +1,5 @@
 file = .file
-. = parse_json!(.message)
+. = parse_json!(replace!(.message, r'^[^{]*', ""))
 .host = get_hostname!()
 .file = file
 

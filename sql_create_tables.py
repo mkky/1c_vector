@@ -11,7 +11,7 @@ import sys
 if len(sys.argv) == 2:
     LOG_PATH = sys.argv[1]
 else:
-    LOG_PATH = "/mnt/c/Users/User/Downloads/TJ_1C/TJ_LOGS/"
+    LOG_PATH = "/home/mikhail/Downloads/archive/"
 
 LOGS_FILES_PATTERN = LOG_PATH + "**/*.log"
 
@@ -78,6 +78,10 @@ from collections import defaultdict
 
 columns = defaultdict(dict)
 
+LST_COLS = ['uid', 'db_name_1c', 'comments', 'db_type', 'db_addr', 'db_name_subd', 'db_user', 'is_license', 'server', 'block_rz', 'file', 'host']
+#LST_COLS = ['uid', 'data', 'host']
+
+columns['LST'] = dict(zip(LST_COLS, ['string'] * len(LST_COLS)))
 for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
 
     log = open(file, 'r', encoding='utf-8')
@@ -95,7 +99,9 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
             for k, v in json_line.items():
                 k = re.sub('[a-z]+:', "", k.lower())
                 columns[name][k] = v
-
+            columns[name]['host'] = 'string'
+            columns[name]['context'] = 'string'
+            columns[name]['file'] = 'string'
         else:
             break
 
@@ -108,24 +114,19 @@ for name, json_line in columns.items():
     if name == 'Context':
         continue
 
-    # print('-- ' + l)
-    print(f'CREATE TABLE tjournal.`{name}`(')
-    # print('`host` String,')
-    # print('`context` String,')
-    # print('`file` String,')
-
-    json_line['host'] = 'string'
-    json_line['context'] = 'string'
-    json_line['file'] = 'string'
+    print(f'CREATE TABLE tjournal.{name}(')
 
     for k, v in json_line.items():
 
         db_type = get_db_type(k, v)
 
         if db_type:
-            print(f'`{k}` {db_type},')
-
-    print(''') ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
+            print(f'  {k} {db_type},')
+    
+    if 'ts' in json_line:
+        print(''') ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
 ORDER BY (ts);\n\n''')
+    else:
+        print(') ENGINE = TinyLog();\n\n')
 
 print('\n\n\n-- ALL EVENTS = {}'.format(list(columns.keys())))

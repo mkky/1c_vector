@@ -4,6 +4,22 @@ CREATE DATABASE tjournal;
 
 
 
+CREATE TABLE tjournal.LST(
+  uid String,
+  db_name_1c String,
+  comments String,
+  db_type String,
+  db_addr String,
+  db_name_subd String,
+  db_user String,
+  is_license String,
+  server String,
+  block_rz String,
+  file String,
+  host String,
+) ENGINE = TinyLog();
+
+
 CREATE TABLE tjournal.`SCALL`(
 `ts` DateTime64(6,'Europe/Moscow'),
 `duration` Int32,

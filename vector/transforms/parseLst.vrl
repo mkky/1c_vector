@@ -1,0 +1,16 @@
+tokens = split!(del(.message), ",")
+.data =   parse_key_value!(replace!(tokens[8], "\"", ""), field_delimiter: ";")
+.uid = slice!(tokens[0], 1)
+.host = get_hostname!()
+.name="LST" # clickhouse table name
+
+.db_name_1c = .data.DB
+.db_addr = .data.DBSrvr
+.db_user = .data.DBUID
+.db_descr = .data.Descr
+.is_license = .data.LicDstr
+.db_type = .data.DBMS
+.server = .data.Srvr
+.comments = .data.Descr
+.db_name_subd = .data.Ref
+.block_rz = .data.SchJobDn
