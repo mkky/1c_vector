@@ -52,12 +52,12 @@ def is_int(s):
 
 def get_db_type(column_name, v):
     if column_name in Int32_COLUMNS:
-        return 'Int32'
+        return 'Int64'
 
     if type(v) == int:
-        return 'Int32'
+        return 'Int64'
     elif type(v) == float:
-        return 'Float6  4'
+        return 'Float64'
     elif type(v) == str:
         if is_datetime(v):
             return "DateTime64(6,'Europe/Moscow')"
