@@ -17,7 +17,7 @@ CREATE TABLE tjournal.LST(
   block_rz String,
   file String,
   host String,
-) ENGINE = TinyLog();
+) ENGINE = ReplacingMergeTree() ORDER BY uid;
 
 
 CREATE TABLE tjournal.`SCALL`(

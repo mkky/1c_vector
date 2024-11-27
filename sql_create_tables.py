@@ -126,6 +126,8 @@ for name, json_line in columns.items():
     if 'ts' in json_line:
         print(''') ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
 ORDER BY (ts);\n\n''')
+    elif 'uid' in json_line:
+        print(') ENGINE = ReplacingMergeTree() ORDER BY uid;\n\n')
     else:
         print(') ENGINE = TinyLog();\n\n')
 
