@@ -1,5 +1,4 @@
 #timezone: Europe/Moscow
-
 sources:
   input_logs:
     type: file
@@ -16,14 +15,35 @@ sources:
     data_dir: /var/lib/vector
     fingerprint:
       strategy: device_and_inode
-    ignore_checkpoints: true
+    multiline:
+      condition_pattern: "\\},\\r"
+      mode: halt_with
+      start_pattern: "\\{[a-z\\d]{8}"
+      timeout_ms: 1000
 
+
+  lst_all:
+    type: file
+    include:
+      - /var/log/logtj/1CV8Clst.lst
+    data_dir: /var/lib/vector
+    multiline:
+      condition_pattern: "NEVER HAPPEND"
+      mode: halt_before 
+      start_pattern: ""
+      timeout_ms: 1000
 transforms:
   filter_db_lines_in_lst:
     inputs:
       - lst_file
     type: filter
     condition: contains( to_string!(.message), ";DBUID=")
+  
+  parse_lst_all:
+    inputs:
+      - lst_all
+    type: remap
+    file: /etc/vector/transforms/parseLstAll.vrl
 
   parse_lst:
     inputs:
@@ -58,6 +78,7 @@ sinks:
     inputs:
       - filter_EVENT_LIST
       - parse_lst
+      - parse_lst_all
     endpoint: ${CLICKHOUSE_SERVER}
     auth:
       strategy: basic
@@ -78,10 +99,12 @@ sinks:
   json_log_to_tmp_folder:
     type: file
     inputs:
-      - filter_EVENT_LIST
+      #- filter_EVENT_LIST
       - parse_lst
+      #:- parse_lst_all
+      #- input_logs
     compression: none
     path: /tmp/%Y_%m_%d__%H_%M.json
     encoding:
       codec: json
-
+  

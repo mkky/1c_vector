@@ -1,16 +1,27 @@
 tokens = split!(del(.message), ",")
+
+#for_each(tokens) -> |_index, value| {
+#  if contains(value, ";DBUID=") {
+#     .data =   parse_key_value!(replace(value, "\"", ""), field_delimiter: ";")
+#}
+#}
+
 .data =   parse_key_value!(replace!(tokens[8], "\"", ""), field_delimiter: ";")
+
 .uid = slice!(tokens[0], 1)
 .host = get_hostname!()
 .name="LST" # clickhouse table name
 
+
+.tokens = tokens
+
 .db_name_1c = .data.DB
 .db_addr = .data.DBSrvr
 .db_user = .data.DBUID
-.db_descr = .data.Descr
+.db_descr = tokens[2]
 .is_license = .data.LicDstr
 .db_type = .data.DBMS
 .server = .data.Srvr
 .comments = .data.Descr
 .db_name_subd = .data.Ref
-.block_rz = .data.SchJobDn
+.block_rz = tokens[17]

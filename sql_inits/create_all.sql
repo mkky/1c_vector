@@ -19,6 +19,17 @@ CREATE TABLE tjournal.LST(
   host String,
 ) ENGINE = ReplacingMergeTree() ORDER BY uid;
 
+CREATE TABLE tjournal.SERVERS(
+  file String,
+  host String,
+  port String,
+  range_end String,
+  range_start String,
+  rport String,
+  server String,
+) ENGINE = ReplacingMergeTree() ORDER BY (server, host);
+
+
 
 CREATE TABLE tjournal.`SCALL`(
 `ts` DateTime64(6,'Europe/Moscow'),

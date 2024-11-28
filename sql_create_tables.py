@@ -80,8 +80,9 @@ columns = defaultdict(dict)
 
 LST_COLS = ['uid', 'db_name_1c', 'comments', 'db_type', 'db_addr', 'db_name_subd', 'db_user', 'is_license', 'server', 'block_rz', 'file', 'host']
 #LST_COLS = ['uid', 'data', 'host']
-
+SERVERS_COLS = ['file', 'host', 'port', 'range_end', 'range_start', 'rport', 'server']
 columns['LST'] = dict(zip(LST_COLS, ['string'] * len(LST_COLS)))
+columns['SERVERS'] = dict(zip(SERVERS_COLS, ['string'] * len(LST_COLS)))
 for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
 
     log = open(file, 'r', encoding='utf-8')
@@ -128,6 +129,8 @@ for name, json_line in columns.items():
 ORDER BY (ts);\n\n''')
     elif 'uid' in json_line:
         print(') ENGINE = ReplacingMergeTree() ORDER BY uid;\n\n')
+    elif 'server' in json_line:
+        print(') ENGINE = ReplacingMergeTree() ORDER BY (server, host);\n\n')
     else:
         print(') ENGINE = TinyLog();\n\n')
 
