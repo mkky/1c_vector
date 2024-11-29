@@ -27,6 +27,8 @@ sources:
     include:
       - /var/log/logtj/1CV8Clst.lst
     data_dir: /var/lib/vector
+    fingerprint:
+      strategy: device_and_inode
     multiline:
       condition_pattern: "NEVER HAPPEND"
       mode: halt_before 
