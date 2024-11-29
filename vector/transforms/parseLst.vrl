@@ -1,4 +1,5 @@
-tokens = split!(del(.message), ",")
+.message = replace!(.message, r'(?P<t1>["\da-z\}])(,)', "$t1|||")
+tokens = split(del(.message), "|||")
 
 #for_each(tokens) -> |_index, value| {
 #  if contains(value, ";DBUID=") {

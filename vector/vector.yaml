@@ -47,6 +47,26 @@ transforms:
     type: remap
     file: /etc/vector/transforms/parseLstAll.vrl
 
+  lst_events:
+    type: lua
+    inputs:
+      - parse_lst_all
+    version: "2"
+    hooks:
+      process: |-
+        function (event, emit)
+          events = event.log.events
+          for _,e in pairs(events) do
+            event.log.events = nil
+            
+            for k,v in pairs(e) do
+              event.log[k]=v
+            end
+            emit(event)
+
+          end
+        end      
+
   parse_lst:
     inputs:
       - filter_db_lines_in_lst
@@ -80,7 +100,7 @@ sinks:
     inputs:
       - filter_EVENT_LIST
       - parse_lst
-      - parse_lst_all
+      - lst_events
     endpoint: ${CLICKHOUSE_SERVER}
     auth:
       strategy: basic
@@ -101,9 +121,9 @@ sinks:
   json_log_to_tmp_folder:
     type: file
     inputs:
-      #- filter_EVENT_LIST
-      #- parse_lst
-      - parse_lst_all
+      - filter_EVENT_LIST
+      - parse_lst
+      - lst_events
       #- input_logs
     compression: none
     path: /tmp/%Y_%m_%d__%H_%M.json

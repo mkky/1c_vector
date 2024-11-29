@@ -1,14 +1,31 @@
 lines=split!(.message, "\n")
-. = merge(., parse_regex!(lines[3], r'"(?P<server>.*)",(?P<port>\d+)\}'))
-prev_value = ""
-msgs = split!(.message, .server)
-range_ports_regex = r'\{(?P<range_start>\d+),(?P<range_end>\d+)\}\s'
-for_each(msgs) -> |_index, value| {
-   if match(value, range_ports_regex) && !exists(.rport) {
-             . = merge(., parse_regex(prev_value , r'(?P<rport>\d+),"$') ?? {"rport": ""})
-             . = merge(., parse_regex!(value, range_ports_regex))	
-	}
-   prev_value = value
+
+.events = []
+for_each(split!(.message, "\n", 12)) -> |_index, value| {
+
+  server = parse_regex(value, r'\{"(?P<server>[^\s,"]+)",(?P<port>\d+)\},?\r') ?? {}
+  if exists(server.server){
+    
+    prev_value = ""
+    msgs = split!(.message, to_string(server.server))
+    range_ports_regex = r'\{(?P<range_start>\d+),(?P<range_end>\d+)\}\s'
+    for_each(msgs) -> |_i, m| {
+        if match(m, range_ports_regex)  {
+             #server.prev_value = prev_value
+             server = merge(server, parse_regex(prev_value , r'",(?P<rport>\d+),"$') ?? {"rport": ""})
+             server = merge(server, parse_regex!(m, range_ports_regex))
+        }
+        prev_value = m
+    }
+
+    .events = append(.events, [server])
+
+  }
+
 }
+
+
+
+
 .name="SERVERS"
 del(.message)
