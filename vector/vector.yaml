@@ -11,7 +11,7 @@ sources:
   lst_file:
     type: file
     include:
-      - /var/log/logtj/1CV8Clst.lst
+      - /var/log/logtj/*.lst
     data_dir: /var/lib/vector
     fingerprint:
       strategy: device_and_inode
