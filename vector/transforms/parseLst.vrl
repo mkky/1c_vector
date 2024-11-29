@@ -26,4 +26,4 @@ tokens = split(del(.message), "|||")
 .server = .data.Srvr
 .comments = .data.Descr
 .db_name_subd = .data.Ref
-.block_rz = tokens[17]
+.block_rz = tokens[16]
