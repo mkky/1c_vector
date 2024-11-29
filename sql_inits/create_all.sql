@@ -27,7 +27,7 @@ CREATE TABLE tjournal.SERVERS(
   range_start String,
   rport String,
   server String,
-) ENGINE = ReplacingMergeTree() ORDER BY (server, host);
+) ENGINE = ReplacingMergeTree() ORDER BY (server, host, port, file);
 
 
 

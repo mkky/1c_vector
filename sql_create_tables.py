@@ -129,8 +129,8 @@ for name, json_line in columns.items():
 ORDER BY (ts);\n\n''')
     elif 'uid' in json_line:
         print(') ENGINE = ReplacingMergeTree() ORDER BY uid;\n\n')
-    elif 'server' in json_line:
-        print(') ENGINE = ReplacingMergeTree() ORDER BY (server, host);\n\n')
+    elif 'server' in json_line and 'file' in json_line and 'port' in json_line:
+        print(') ENGINE = ReplacingMergeTree() ORDER BY (server, host, port, file);\n\n')
     else:
         print(') ENGINE = TinyLog();\n\n')
 
