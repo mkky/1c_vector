@@ -78,7 +78,7 @@ from collections import defaultdict
 
 columns = defaultdict(dict)
 
-LST_COLS = ['uid', 'db_name_1c', 'comments', 'db_type', 'db_addr', 'db_name_subd', 'db_user', 'is_license', 'server', 'block_rz', 'file', 'host']
+LST_COLS = ['uid', 'db_name_1c', 'comments', 'db_type', 'db_descr', 'db_addr', 'db_name_subd', 'db_user', 'is_license', 'server', 'block_rz', 'file', 'host']
 #LST_COLS = ['uid', 'data', 'host']
 SERVERS_COLS = ['file', 'host', 'port', 'range_end', 'range_start', 'rport', 'server']
 columns['LST'] = dict(zip(LST_COLS, ['string'] * len(LST_COLS)))
