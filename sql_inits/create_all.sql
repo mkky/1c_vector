@@ -877,5 +877,8 @@ CREATE TABLE tjournal.reg(`ts` DateTime,
                                   `Server` String,
                                   `MainPort` UInt16,
                                   `AddPort` UInt16,
-                                  `Session` Int32) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
+                                  `Session` Int32,
+				   file String,
+				   host String,
+			) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
 ORDER BY (ts);
