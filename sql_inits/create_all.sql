@@ -855,3 +855,27 @@ ORDER BY (ts);
 
 
 -- ALL EVENTS = ['SCALL', 'ATTN', 'CONN', 'CALL', 'ADMIN', 'EXCP', 'CLSTR', 'Context', 'SESN', 'HASP', 'SRVC', 'DBPOSTGRS', 'VRSREQUEST', 'SDBL', 'VRSRESPONSE', 'TLOCK', 'LIC', 'SCOM', 'EXCPCNTX', 'FTEXTUpd', 'FTS', 'EVENTLOG', 'SDGC', 'DBMSSQL', 'DBMSSQLCONN', 'QERR', 'ADDIN', 'TTIMEOUT']
+
+
+
+CREATE TABLE tjournal.reg(`ts` DateTime,
+                                  `TransactionStatus` String,
+                                  `TransactionDate` DateTime,
+                                  `TransactionNumber` Int32,
+                                  `User` String,
+                                  `UserUuid` String,
+                                  `Computer` String,
+                                  `Application` String,
+                                  `Connection` Int32,
+                                  `Event` String,
+                                  `Severity` String,
+                                  `Comment` String,
+                                  `Metadata` String,
+                                  `MetadataUuid` String,
+                                  `Data` String,
+                                  `DataPresentation` String,
+                                  `Server` String,
+                                  `MainPort` UInt16,
+                                  `AddPort` UInt16,
+                                  `Session` Int32) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
+ORDER BY (ts);
