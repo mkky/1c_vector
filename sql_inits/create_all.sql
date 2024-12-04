@@ -858,9 +858,9 @@ ORDER BY (ts);
 
 
 
-CREATE TABLE tjournal.reg(`ts` DateTime,
+CREATE TABLE tjournal.reg(`ts` DateTime64(6,'Europe/Moscow'),
                                   `TransactionStatus` String,
-                                  `TransactionDate` DateTime,
+                                  `TransactionDate` String,
                                   `TransactionNumber` Int32,
                                   `User` String,
                                   `UserUuid` String,
@@ -880,5 +880,6 @@ CREATE TABLE tjournal.reg(`ts` DateTime,
                                   `Session` Int32,
 				   file String,
 				   host String,
+				   db_uid String,
 			) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
 ORDER BY (ts);

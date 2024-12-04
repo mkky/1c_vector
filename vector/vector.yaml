@@ -34,6 +34,17 @@ sources:
       mode: halt_before 
       start_pattern: "\\{0,\\r"
       timeout_ms: 1000
+
+
+  lgp_logs:
+    type: file
+    include:
+      - /var/log/logtj/**/*.lgp
+    data_dir: /var/lib/vector
+    fingerprint:
+      strategy: device_and_inode
+    line_delimiter: "},\r"
+
 transforms:
   filter_db_lines_in_lst:
     inputs:
@@ -50,7 +61,7 @@ transforms:
   lst_events:
     type: lua
     inputs:
-      - parse_lst_all
+       - parse_lst_all
     version: "2"
     hooks:
       process: |-
@@ -94,6 +105,26 @@ transforms:
     type: filter
     condition: includes(split("${EVENT_LIST}", ","), to_string!(.name))
 
+  parse_lgp:
+    inputs:
+      - lgp_logs
+    type: remap
+    file: /etc/vector/transforms/parseLgp.vrl
+
+  parse_lgf_dict:
+    type: lua
+    version: "2"
+    inputs:
+      - parse_lgp
+    source: |-
+      require 'transform'
+    hooks:
+      init: init
+      process: process
+      shutdown: shutdown
+    timers:
+     - interval_seconds: 1
+       handler: timer_handler
 sinks:
   clickhouse:
     type: clickhouse
@@ -101,6 +132,7 @@ sinks:
       - filter_EVENT_LIST
       - parse_lst
       - lst_events
+      - parse_lgf_dict
     endpoint: ${CLICKHOUSE_SERVER}
     auth:
       strategy: basic
@@ -124,6 +156,7 @@ sinks:
       - filter_EVENT_LIST
       - parse_lst
       - lst_events
+      - parse_lgf_dict
       #- input_logs
     compression: none
     path: /tmp/%Y_%m_%d__%H_%M.json
