@@ -17,7 +17,7 @@ tokens = split(del(.message), "|||")
 
 .tokens = tokens
 
-.db_name_1c = .data.DB
+.db_name_1c = .data.Ref
 .db_addr = .data.DBSrvr
 .db_user = .data.DBUID
 .db_descr = tokens[2]
