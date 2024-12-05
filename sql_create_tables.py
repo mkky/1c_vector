@@ -11,7 +11,7 @@ import sys
 if len(sys.argv) == 2:
     LOG_PATH = sys.argv[1]
 else:
-    LOG_PATH = "/home/mikhail/Downloads/archive/"
+    LOG_PATH = "/home/mikhail/Downloads/1c/archive/"
 
 LOGS_FILES_PATTERN = LOG_PATH + "**/*.log"
 
@@ -106,6 +106,11 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
                 continue
 
             name = json_line['name']
+            
+            if CREATE_ONLY_THIS_TABLES:
+                if name not in CREATE_ONLY_THIS_TABLES:
+                    continue
+
 
             for k, v in json_line.items():
                 k = re.sub('[a-z]+:', "", k.lower())
@@ -119,10 +124,6 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
             break
 
 for name, json_line in columns.items():
-
-    if CREATE_ONLY_THIS_TABLES:
-        if name not in CREATE_ONLY_THIS_TABLES:
-            continue
 
     if name == 'Context':
         continue
