@@ -39,20 +39,18 @@ function loadDictonary()
     local file_content = file:read "*a"
     file:close()
 
-    
-
-  for dictonary_type, value in file_content:gmatch('{(%d+),(.-)}') do
-    local s, e, id = value:find("(%d+)$")
-    local data   = value:sub(1, s-2)
+  for dictonary_type, data, id in file_content:gmatch('\n{(%d+),"(.-)",(%d+)}') do
     local dtype = tonumber(dictonary_type)
-
     if (dtype > 0) and (dtype < 9) then
       dictonaries[dictonaryIndex[dtype]][id] = data
-    else 
-      goto continue 
     end
+  end
 
-  ::continue::  
+  for dictonary_type, data, id in file_content:gmatch('\n{(%d+),(%w+-%w+-%w+-%w+-%w+,".-"),(%d+)}') do
+    local dtype = tonumber(dictonary_type)
+    if (dtype > 0) and (dtype < 9) then
+      dictonaries[dictonaryIndex[dtype]][id] = data
+    end
   end
 end
 
