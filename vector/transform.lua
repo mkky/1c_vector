@@ -43,7 +43,7 @@ function loadDictonary(file, db)
   if dictonaries[db] == nil then
     dictonaries[db] = {users={}, computers={}, applications={}, events={}, metadata={}, servers={}, ports={}, portsAdd={}}
   end
-  for dictonary_type, data, id in file_content:gmatch('\n{(%d+),"(.-)",(%d+)}') do
+  for dictonary_type, data, id in file_content:gmatch('\n{(%d+),(.-),(%d+)}') do
     local dtype = tonumber(dictonary_type)
     if (dtype > 0) and (dtype < 9) then
       dictonaries[db][dictonaryIndex[dtype]][id] = data
@@ -72,13 +72,14 @@ function getDictonaryValue(file, db, id, type)
     if value ~= nil then 
       return {value=value, status=true}  
     else
-      if lastReloadDictonary < processed  and type == "users" then -- Обновим словарь если на этой строке лога мы его еще не обновляли
+      if lastReloadDictonary < processed then -- Обновим словарь если на этой строке лога мы его еще не обновляли
         loadDictonary(file, db)
         lastReloadDictonary = processed
         value = dictonaries[db][type][id] -- Повторим поиск
           if value ~= nil then 
             return {value=value, status=true}  
           else
+            --print("vallue is nil for type=" .. type)
             return {value=id, status=false}
           end
       else -- словарь уже обновлен поэтому вернес статус что значение не найдено
