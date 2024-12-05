@@ -1,5 +1,7 @@
-#timezone: Europe/Moscow
+timezone: Europe/Moscow
 sources:
+
+
   input_logs:
     type: file
     include:
@@ -47,10 +49,12 @@ sources:
       condition_pattern: "\\{\\d{14},\\w,"
       mode: halt_before
       start_pattern: ""
-      timeout_ms: 10000
+      timeout_ms: 1000
 
 
 transforms:
+
+
   filter_db_lines_in_lst:
     inputs:
       - lst_file
@@ -127,9 +131,9 @@ transforms:
       init: init
       process: process
       shutdown: shutdown
-    timers:
-     - interval_seconds: 1
-       handler: timer_handler
+      #timers:
+      #- interval_seconds: 1
+      # handler: timer_handler
 sinks:
   clickhouse:
     type: clickhouse
@@ -138,6 +142,7 @@ sinks:
       - parse_lst
       - lst_events
       - parse_lgf_dict
+      #- parse_lgp
     endpoint: ${CLICKHOUSE_SERVER}
     auth:
       strategy: basic
@@ -158,13 +163,13 @@ sinks:
   json_log_to_tmp_folder:
     type: file
     inputs:
-      - filter_EVENT_LIST
+      #- filter_EVENT_LIST
       - parse_lst
-      - lst_events
-      - parse_lgf_dict
+      #- lst_events
+      #- parse_lgf_dict
       #- input_logs
     compression: none
     path: /tmp/%Y_%m_%d__%H_%M.json
     encoding:
       codec: json
-  
+      #  
