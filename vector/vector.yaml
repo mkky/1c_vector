@@ -43,7 +43,12 @@ sources:
     data_dir: /var/lib/vector
     fingerprint:
       strategy: device_and_inode
-    line_delimiter: "\n{0}\r\n},\r"
+    multiline:
+      condition_pattern: "\\{\\d{14},\\w,"
+      mode: halt_before
+      start_pattern: ""
+      timeout_ms: 10000
+
 
 transforms:
   filter_db_lines_in_lst:
