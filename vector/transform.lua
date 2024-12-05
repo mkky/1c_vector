@@ -1,5 +1,6 @@
 dictonaryIndex = {"users","computers","applications","events","metadata","servers","ports","portsAdd"}
-dictonaries = {users={}, computers={}, applications={}, events={}, metadata={}, servers={}, ports={}, portsAdd={}}
+--dictonaries = {users={}, computers={}, applications={}, events={}, metadata={}, servers={}, ports={}, portsAdd={}}
+dictonaries = {}
 
 startEpoch = -62135632799
 dictonaryFilePath = nil
@@ -25,11 +26,11 @@ function getPath(str)
     return str:match("(.*[/\\/])")
 end
 
-function loadDictonary()
+function loadDictonary(db)
   if dictonaryFilePath == nil then
     dictonaryFilePath = getPath(fileProcessing).."1Cv8.lgf"
   end  
-  print("DICTONARY RELOAD: "..dictonaryFilePath)
+  --print("DICTONARY RELOAD: "..dictonaryFilePath)
 
   local file = io.open(dictonaryFilePath, "r")
     if not file then 
@@ -38,29 +39,33 @@ function loadDictonary()
     end
     local file_content = file:read "*a"
     file:close()
-
+  
+  if dictonaries[db] == nil then
+    dictonaries[db] = {users={}, computers={}, applications={}, events={}, metadata={}, servers={}, ports={}, portsAdd={}}
+  end
   for dictonary_type, data, id in file_content:gmatch('\n{(%d+),"(.-)",(%d+)}') do
     local dtype = tonumber(dictonary_type)
     if (dtype > 0) and (dtype < 9) then
-      dictonaries[dictonaryIndex[dtype]][id] = data
+      dictonaries[db][dictonaryIndex[dtype]][id] = data
     end
   end
 
   for dictonary_type, data, id in file_content:gmatch('\n{(%d+),(%w+-%w+-%w+-%w+-%w+,".-"),(%d+)}') do
     local dtype = tonumber(dictonary_type)
     if (dtype > 0) and (dtype < 9) then
-      dictonaries[dictonaryIndex[dtype]][id] = data
+      dictonaries[db][dictonaryIndex[dtype]][id] = data
     end
   end
 end
 
 -- return {value, status = true - найден, false - не найден, nil - для поиска передано нулевое значение}
 -- 
-function getDictonaryValue(id, type)
+function getDictonaryValue(db, id, type)
   if id ~= "0" then
-    local status, value  = pcall(function() return dictonaries[type][id] end, type, id)
+    --loadDictonary(db)
+    local status, value  = pcall(function() return dictonaries[db][type][id] end, type, id)
     if status == false then
-      print("DICTONARY FIND ERROR: type["..type.."]["..id.."]",value)
+      --print("DICTONARY FIND ERROR: type["..type.."]["..id.."]",value)
       value = nil
     end  
     
@@ -68,9 +73,9 @@ function getDictonaryValue(id, type)
       return {value=value, status=true}  
     else
       if lastReloadDictonary < processed then -- Обновим словарь если на этой строке лога мы его еще не обновляли
-        loadDictonary()
+        loadDictonary(db)
         lastReloadDictonary = processed
-        value = dictonaries[type][id] -- Повторим поиск
+        value = dictonaries[db][type][id] -- Повторим поиск
           if value ~= nil then 
             return {value=value, status=true}  
           else
@@ -118,7 +123,7 @@ function process (event, emit)
       event.log.errLUA = nil
 
       --------------------------- USER ------------------------------
-        status, result = pcall(getDictonaryValue, event.log.User, "users")
+        status, result = pcall(getDictonaryValue, event.log.db_uid, event.log.User, "users")
         if status == true then -- проверка на исключение
           if result.status == true then
             local userObj = split(result.value, ",")
@@ -133,7 +138,7 @@ function process (event, emit)
         end  
  
      --------------------------- COMPUTER ------------------------------
-        status, result = pcall(getDictonaryValue, event.log.Computer, "computers")
+        status, result = pcall(getDictonaryValue, event.log.db_uid, event.log.Computer, "computers")
         if status == true then -- проверка на исключение
           if result.status == true then
             event.log.Computer = result.value:gsub('"','')
@@ -146,7 +151,7 @@ function process (event, emit)
         end  
      --------------------------- APPLICATION ------------------------------
 
-        status, result = pcall(getDictonaryValue, event.log.Application, "applications")
+        status, result = pcall(getDictonaryValue, event.log.db_uid, event.log.Application, "applications")
         if status == true then -- проверка на исключение
           if result.status == true then
             event.log.Application = result.value:gsub('"','')
@@ -159,7 +164,7 @@ function process (event, emit)
         end
      ------------------------------ EVENT ----------------------------------
 
-        status, result = pcall(getDictonaryValue, event.log.Event, "events")
+        status, result = pcall(getDictonaryValue, event.log.db_uid, event.log.Event, "events")
         if status == true then -- проверка на исключение
           if result.status == true then
             event.log.Event = result.value
@@ -173,7 +178,7 @@ function process (event, emit)
 
      ------------------------------ METADATA --------------------------------
 
-        status, result = pcall(getDictonaryValue, event.log.Metadata, "metadata")
+        status, result = pcall(getDictonaryValue, event.log.db_uid, event.log.Metadata, "metadata")
         if status == true then -- проверка на исключение
           if result.status == true then
             local metaObj = split(result.value,",")
@@ -189,7 +194,7 @@ function process (event, emit)
 
      -------------------------------- SERVER --------------------------------
 
-        status, result = pcall(getDictonaryValue, event.log.Server, "servers")
+        status, result = pcall(getDictonaryValue, event.log.db_uid, event.log.Server, "servers")
         if status == true then -- проверка на исключение
           if result.status == true then
             event.log.Server = result.value:gsub('"','')
@@ -203,7 +208,7 @@ function process (event, emit)
 
      ------------------------------ PORT ----------------------------------
 
-        status, result = pcall(getDictonaryValue, event.log.MainPort, "ports")
+        status, result = pcall(getDictonaryValue, event.log.db_uid, event.log.MainPort, "ports")
         if status == true then -- проверка на исключение
           if result.status == true then
             event.log.MainPort = result.value
@@ -217,7 +222,7 @@ function process (event, emit)
 
      ------------------------------ PORTADD --------------------------------
 
-        status, result = pcall(getDictonaryValue, event.log.AddPort, "portsAdd")
+        status, result = pcall(getDictonaryValue, event.log.db_uid, event.log.AddPort, "portsAdd")
         if status == true then -- проверка на исключение
           if result.status == true then
             event.log.AddPort = result.value
