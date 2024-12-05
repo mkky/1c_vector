@@ -1,6 +1,10 @@
 file = .file
 ., err = parse_regex(.message, r'\{(?P<DateTime>\d{14}),(?P<TransactionStatus>\w),\s+\{(?P<TransactionDate>.+?)\},(?P<User>\d+),(?P<Computer>\d+),(?P<Application>\d+),(?P<Connection>\d+),(?P<Event>\d+),(?P<Severity>\w),"(?P<Comment>[\s\S]*?)",(?P<Metadata>\d+),\s+(?P<Data>[\s\S]+?\}),"(?P<DataPresentation>.*?)",(?P<Server>\d+),(?P<MainPort>\d+),(?P<AddPort>\d+),(?P<Session>\d+)', numeric_groups: false)                                          
 
+if err != null {
+  abort
+}
+
 .name = "REG" # ClickHouse table name
 .host = get_hostname!()
 .file = file
