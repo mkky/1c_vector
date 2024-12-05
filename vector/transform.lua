@@ -5,7 +5,7 @@ dictonaries = {}
 startEpoch = -62135632799
 dictonaryFilePath = nil
 fileProcessing = nil
-env_onec_logs_debug = os.getenv("onec_logs_debug")
+--env_onec_logs_debug = os.getenv("onec_logs_debug")
 
 function tableLength(table)
   count = 0
@@ -72,7 +72,7 @@ function getDictonaryValue(file, db, id, type)
     if value ~= nil then 
       return {value=value, status=true}  
     else
-      if lastReloadDictonary < processed then -- Обновим словарь если на этой строке лога мы его еще не обновляли
+      if lastReloadDictonary < processed  and type == "users" then -- Обновим словарь если на этой строке лога мы его еще не обновляли
         loadDictonary(file, db)
         lastReloadDictonary = processed
         value = dictonaries[db][type][id] -- Повторим поиск
