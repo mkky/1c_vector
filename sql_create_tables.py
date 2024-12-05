@@ -51,11 +51,16 @@ def is_int(s):
 
 
 def get_db_type(column_name, v):
-    if column_name in Int32_COLUMNS:
+    if column_name == 'duration':
         return 'Int64'
+    elif column_name in Int32_COLUMNS:
+        return 'Int32'
 
     if type(v) == int:
-        return 'Int64'
+        if 'port' in column_name.lower():
+            return 'UInt16'
+        else:
+            return 'Int32'
     elif type(v) == float:
         return 'Float64'
     elif type(v) == str:
@@ -83,6 +88,11 @@ LST_COLS = ['uid', 'db_name_1c', 'comments', 'db_type', 'db_descr', 'db_addr', '
 SERVERS_COLS = ['file', 'host', 'port', 'range_end', 'range_start', 'rport', 'server']
 columns['LST'] = dict(zip(LST_COLS, ['string'] * len(LST_COLS)))
 columns['SERVERS'] = dict(zip(SERVERS_COLS, ['string'] * len(LST_COLS)))
+
+columns['REG'] = dict({"ts":"2024-07-12T12:28:47.000000", "TransactionStatus":"String", "TransactionDate":"String", "TransactionNumber": 12345, "User": "String",
+                       "UserUuid":"String", "Computer": "String", "Application": "String", "Connection": 12345, "Event": "String", "Severity": "String",
+                       "Comment": "String", "Metadata": "String", "MetadataUuid": "String", "Data": "String", "DataPresentation": "String", "Server": "String",
+                       "MainPort": 12345, "AddPort": 12345, "Session": 12345, "file": "String", "host": "String", "db_uid": "String"})
 for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
 
     log = open(file, 'r', encoding='utf-8')
@@ -99,6 +109,8 @@ for file in glob.glob(LOGS_FILES_PATTERN, recursive=True):
 
             for k, v in json_line.items():
                 k = re.sub('[a-z]+:', "", k.lower())
+                if ' ' in k or len(k) > 100:
+                   continue
                 columns[name][k] = v
             columns[name]['host'] = 'string'
             columns[name]['context'] = 'string'
@@ -118,7 +130,7 @@ for name, json_line in columns.items():
     print(f'CREATE TABLE tjournal.{name}(')
 
     for k, v in json_line.items():
-
+        
         db_type = get_db_type(k, v)
 
         if db_type:
