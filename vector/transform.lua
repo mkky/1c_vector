@@ -180,9 +180,21 @@ dict_events= {
                 ["_$User$_.UpdateError"] = "Пользователи. Ошибка изменения",
 }
 
---print (dict_events["_$Job$_.Fail"])
-
-
+dict_applications = {
+	        ["1CV8"] = "Толстый клиент",
+                ["1CV8C"] = "Тонкий клиент",
+                ["WebClient"] = "Веб-клиент",
+                ["Designer"] = "Конфигуратор",
+                ["COMConnection"] = "Внешнее соединение (COM, обычное)",
+                ["WSConnection"] = "Сессия web-сервиса",
+                ["BackgroundJob"] = "Фоновое задание",
+                ["SystemBackgroundJob"] = "Системное фоновое задание",
+                ["SrvrConsole"] = "Консоль кластера",
+                ["COMConsole"] = "Внешнее соединение (COM, административное)",
+                ["JobScheduler"] = "Планировщик заданий",
+                ["Debugger"] = "Отладчик",
+                ["RAS"] = "Сервер администрирования",
+	}
 --------------------------- TIMER ------------------------------
 
 function timer_handler (emit)
@@ -247,6 +259,10 @@ function process (event, emit)
         if status == true then -- проверка на исключение
           if result.status == true then
             event.log.Application = result.value:gsub('"','')
+	    translated = dict_applications[event.log.Application]
+            if translated ~= nil then
+              event.log.Application = translated
+            end
           end
         else
           print("ERROR Application", result, "input", event.log.Application)
