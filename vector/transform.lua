@@ -3,8 +3,8 @@ dictonaryIndex = {"users","computers","applications","events","metadata","server
 dictonaries = {}
 
 startEpoch = -62135632799
-dictonaryFilePath = nil
-fileProcessing = nil
+--dictonaryFilePath = nil
+--fileProcessing = nil
 --env_onec_logs_debug = os.getenv("onec_logs_debug")
 
 function tableLength(table)
