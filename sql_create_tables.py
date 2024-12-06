@@ -139,7 +139,7 @@ for name, json_line in columns.items():
     
     if 'ts' in json_line:
         print(''') ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);\n\n''')
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);\n\n''')
     elif 'uid' in json_line:
         print(') ENGINE = ReplacingMergeTree() ORDER BY uid;\n\n')
     elif 'server' in json_line and 'file' in json_line and 'port' in json_line:
