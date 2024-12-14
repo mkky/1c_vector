@@ -7,14 +7,11 @@ sources:
 
   prf_logs:
     type: file
-    ignore_checkpoints: true
     include:
-      #- ./logs/prf/*0000*.xml
       - /var/log/logtj/prf/*0000*.xml
-      #data_dir: ./vector
     fingerprint:
-      strategy: device_and_inode
-      
+      strategy: device_and_inode 
+
 transforms:
   parse_prf:
     inputs:
