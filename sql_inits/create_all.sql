@@ -57,7 +57,7 @@ CREATE TABLE tjournal.REG(
   host String,
   db_uid String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.SCALL(
@@ -88,7 +88,7 @@ CREATE TABLE tjournal.SCALL(
   dbms String,
   database String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.ATTN(
@@ -108,7 +108,7 @@ CREATE TABLE tjournal.ATTN(
   processid String,
   pid String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.CONN(
@@ -131,7 +131,7 @@ CREATE TABLE tjournal.CONN(
   connectid String,
   calls String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.CALL(
@@ -168,7 +168,7 @@ CREATE TABLE tjournal.CALL(
   func String,
   module String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.ADMIN(
@@ -193,7 +193,7 @@ CREATE TABLE tjournal.ADMIN(
   cluster String,
   serverid String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.EXCP(
@@ -215,7 +215,7 @@ CREATE TABLE tjournal.EXCP(
   exception String,
   connectid String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.CLSTR(
@@ -254,7 +254,7 @@ CREATE TABLE tjournal.CLSTR(
   infobase String,
   distribdata String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.HASP(
@@ -277,7 +277,7 @@ CREATE TABLE tjournal.HASP(
   sessionid String,
   usr String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.SESN(
@@ -300,7 +300,7 @@ CREATE TABLE tjournal.SESN(
   context String,
   file String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.SRVC(
@@ -319,7 +319,7 @@ CREATE TABLE tjournal.SRVC(
   context String,
   file String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.DBPOSTGRS(
@@ -352,7 +352,7 @@ CREATE TABLE tjournal.DBPOSTGRS(
   func String,
   tablename String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.VRSREQUEST(
@@ -376,7 +376,7 @@ CREATE TABLE tjournal.VRSREQUEST(
   context String,
   file String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.SDBL(
@@ -407,7 +407,7 @@ CREATE TABLE tjournal.SDBL(
   sbst String,
   tablename String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.VRSRESPONSE(
@@ -431,7 +431,7 @@ CREATE TABLE tjournal.VRSRESPONSE(
   context String,
   file String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.LIC(
@@ -453,7 +453,7 @@ CREATE TABLE tjournal.LIC(
   context String,
   file String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.TLOCK(
@@ -481,7 +481,7 @@ CREATE TABLE tjournal.TLOCK(
   file String,
   appid String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 CREATE TABLE tjournal.SCOM(
@@ -503,10 +503,22 @@ CREATE TABLE tjournal.SCOM(
   connectid String,
   srcprocessname String,
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts);
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 
 
 
 -- ALL EVENTS = ['LST', 'SERVERS', 'REG', 'SCALL', 'ATTN', 'CONN', 'CALL', 'ADMIN', 'EXCP', 'CLSTR', 'HASP', 'Context', 'SESN', 'SRVC', 'DBPOSTGRS', 'VRSREQUEST', 'SDBL', 'VRSRESPONSE', 'LIC', 'TLOCK', 'SCOM']
+CREATE TABLE tjournal.PRF(
+  host LowCardinality(String),
+  operation_comment LowCardinality(String),
+  ts DateTime,
+  operation_name LowCardinality(String),
+  operation_uid LowCardinality(String),
+  session_number UInt32,
+  time Decimal32(4),
+  user LowCardinality(String),
+) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
+ORDER BY (ts)
+
