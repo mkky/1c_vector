@@ -1,0 +1,94 @@
+timezone: Europe/Moscow
+
+api:
+  enabled: True
+
+sources:
+
+  prf_logs:
+    type: file
+    ignore_checkpoints: true
+    include:
+      #- ./logs/prf/*0000*.xml
+      - /var/log/logtj/prf/*0000*.xml
+      #data_dir: ./vector
+    fingerprint:
+      strategy: device_and_inode
+      
+transforms:
+  parse_prf:
+    inputs:
+      - prf_logs
+    type: lua
+    version: "2"
+    hooks:
+      init:
+        function()
+          operation={}
+        end
+      process: |-
+        function(event, emit)
+          start_str = string.sub(event.log.message, 1, 3)
+          if start_str == "\t\t<" then
+           
+
+            event.log.priority = string.match(event.log.message, "priority=\"(.-)\"")
+            event.log.session_number = string.match(event.log.message, "sessionNumber=\"(.-)\"")
+            event.log.user = string.match(event.log.message, "userName=\"(.-)\"")
+
+
+            event.log.time = string.match(event.log.message, "value=\"(.-)\"")
+            event.log.ts = string.match(event.log.message, "tSaveUTC=\"(.-)\"")
+            event.log.operation_name=operation[event.log.file]["name"]
+            event.log.operation_uid=operation[event.log.file]["uid"]
+            event.log.operation_comment=operation[event.log.file]["comment"]
+            event.log.operation_target_value=operation[event.log.file]["target_value"]           
+             
+            event.log.name = "PRF" 
+            event.log.message=""
+            emit(event)
+          elseif start_str == "\t<p" then
+            operation[event.log.file] = {
+                ["name"] = string.match(event.log.message, "name=\"(.-)\""),
+                ["uid"] = string.match(event.log.message, "uid=\"(.-)\""),
+                ["comment"] = string.match(event.log.message, "comment=\"(.-)\""),
+                ["target_value"] = string.match(event.log.message, "targetValue=\"(.-)\""),
+            }
+
+          elseif start_str == "</p" then
+            operation[event.log.file] = nil
+        
+          end
+        end
+
+
+sinks:
+  clickhouse:
+    type: clickhouse
+    inputs:
+      - parse_prf
+    endpoint: ${CLICKHOUSE_SERVER}
+    auth:
+      strategy: basic
+      user: ${CLICKHOUSE_USER}
+      password: ${CLICKHOUSE_PASSWORD}
+    database: ${CLICKHOUSE_DATABASE}
+    skip_unknown_fields: true
+    table: "{{ .name }}"
+    batch:
+      max_events: 10000
+      timeout_secs: 5
+    acknowledgements:
+      enabled: true
+
+
+ ## Пишем данные, которую фильтруются в БД еще и в json файлы в ./tmp/
+
+  json_log_to_tmp_folder:
+    type: file
+    inputs:
+      - parse_prf
+    compression: none
+    path: /tmp/%Y_%m_%d__%H_%M.json
+    encoding:
+       codec: json
