@@ -32,6 +32,7 @@ transforms:
             event.log.session_number = string.match(event.log.message, "sessionNumber=\"(.-)\"")
             event.log.user = string.match(event.log.message, "userName=\"(.-)\"")
 
+            event.log.db_uid = string.match(event.log.file, "/([%w]+-[%w]+-[%w]+-[%w]+-[%w]+)/")
 
             event.log.time = string.match(event.log.message, "value=\"(.-)\"")
             event.log.ts = string.match(event.log.message, "tSaveUTC=\"(.-)\"")
