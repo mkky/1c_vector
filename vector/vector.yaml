@@ -1,79 +1,148 @@
 timezone: Europe/Moscow
-
-api:
-  enabled: True
-
 sources:
 
-  prf_logs:
+
+  input_logs:
     type: file
     include:
-      - /var/log/logtj/prf/*0000*.xml
+      - /var/log/logtj/**/*.log
+    data_dir: /var/lib/vector
     fingerprint:
-      strategy: device_and_inode 
+      strategy: device_and_inode
+
+  lst_file:
+    type: file
+    include:
+      - /var/log/logtj/*.lst
+    data_dir: /var/lib/vector
+    fingerprint:
+      strategy: device_and_inode
+    multiline:
+      condition_pattern: "\\},\\r"
+      mode: halt_with
+      start_pattern: "\\{[a-z\\d]{8}"
+      timeout_ms: 1000
+
+
+  lst_all:
+    type: file
+    include:
+      - /var/log/logtj/*.lst
+    data_dir: /var/lib/vector
+    fingerprint:
+      strategy: device_and_inode
+    multiline:
+      condition_pattern: "\\}\\s*\\{"
+      mode: halt_before 
+      start_pattern: "\\{0,\\r"
+      timeout_ms: 1000
+
+
+  lgp_logs:
+    type: file
+    include:
+      - /var/log/logtj/**/*.lgp
+    data_dir: /var/lib/vector
+    fingerprint:
+      strategy: device_and_inode
+    multiline:
+      condition_pattern: "\\{\\d{14},\\w,"
+      mode: halt_before
+      start_pattern: ""
+      timeout_ms: 1000
+
 
 transforms:
-  parse_prf:
+
+
+  filter_db_lines_in_lst:
     inputs:
-      - prf_logs
+      - lst_file
+    type: filter
+    condition: contains( to_string!(.message), ";DBUID=")
+  
+  parse_lst_all:
+    inputs:
+      - lst_all
+    type: remap
+    file: /etc/vector/transforms/parseLstAll.vrl
+
+  lst_events:
     type: lua
+    inputs:
+       - parse_lst_all
     version: "2"
     hooks:
-      init:
-        function()
-          operation={}
-        end
       process: |-
-        function(event, emit)
-          start_str = string.sub(event.log.message, 1, 3)
-          if start_str == "\t\t<" then
-           
-
-            event.log.session_number = string.match(event.log.message, "sessionNumber=\"(.-)\"")
-            event.log.user = string.match(event.log.message, "userName=\"(.-)\"")
-
-            event.log.db_uid = string.match(event.log.file, "/([%w]+-[%w]+-[%w]+-[%w]+-[%w]+)/")
-
-            event.log.time = string.match(event.log.message, "value=\"(.-)\"")
-            event.log.ts = string.match(event.log.message, "tSaveUTC=\"(.-)\"")
-            event.log.operation_name=operation[event.log.file]["name"]
-            event.log.operation_uid=operation[event.log.file]["uid"]
-            event.log.operation_comment=operation[event.log.file]["comment"]
-            event.log.operation_target_value=operation[event.log.file]["target_value"]           
-            event.log.operation_priority=operation[event.log.file]["priority"]           
-            event.log.conf_name=operation[event.log.file]["conf_name"]           
-            event.log.conf_version=operation[event.log.file]["conf_version"]           
+        function (event, emit)
+          events = event.log.events
+          for _,e in pairs(events) do
+            event.log.events = nil
             
-            event.log.name = "PRF" 
-            event.log.message=""
+            for k,v in pairs(e) do
+              event.log[k]=v
+            end
             emit(event)
-          elseif start_str == "\t<p" then
-            comment = string.match(event.log.message, "comment=\"(.-)\"")
-                       
-            conf_name = string.match(comment, "Конф&quot;:&quot;(.-)&quot;")
-            conf_version = string.match(comment, "КонфВер&quot;:&quot;(.-)&quot;")
-            operation[event.log.file] = {
-                ["conf_name"] = conf_name,
-                ["conf_version"] = conf_version,
-                ["name"] = string.match(event.log.message, "name=\"(.-)\""),
-                ["uid"] = string.match(event.log.message, "uid=\"(.-)\""),
-                ["comment"] = comment,
-                ["target_value"] = string.match(event.log.message, "targetValue=\"(.-)\""),
-                ["priority"] = string.match(event.log.message, "priority=\"(.-)\"")
-            }
 
-          elseif start_str == "</p" then
-            operation[event.log.file] = nil
-        
           end
-        end
+        end      
+
+  parse_lst:
+    inputs:
+      - filter_db_lines_in_lst
+    type: remap
+    file: /etc/vector/transforms/parseLst.vrl
+
+  remap_logs:
+    inputs:
+      - input_logs
+    type: remap
+    file: /etc/vector/transforms/parseLog.vrl
+
+  add_context_event:
+    inputs:
+      - remap_logs
+    type: reduce
+    starts_when:
+      type: vrl
+      source: .name != "Context"
 
 
+  filter_EVENT_LIST:
+    inputs:
+      - add_context_event
+    type: filter
+    condition: includes(split("${EVENT_LIST}", ","), to_string!(.name))
+
+  parse_lgp:
+    inputs:
+      - lgp_logs
+    type: remap
+    file: /etc/vector/transforms/parseLgp.vrl
+
+  parse_lgf_dict:
+    type: lua
+    version: "2"
+    inputs:
+      - parse_lgp
+    source: |-
+      require 'transform'
+    hooks:
+      init: init
+      process: process
+      shutdown: shutdown
+      #timers:
+      #- interval_seconds: 1
+      # handler: timer_handler
 sinks:
   clickhouse:
     type: clickhouse
     inputs:
-      - parse_prf
+      - filter_EVENT_LIST
+      - parse_lst
+      - lst_events
+      - parse_lgf_dict
+      #- parse_lgp
     endpoint: ${CLICKHOUSE_SERVER}
     auth:
       strategy: basic
@@ -94,8 +163,13 @@ sinks:
   json_log_to_tmp_folder:
     type: file
     inputs:
-      - parse_prf
+      #- filter_EVENT_LIST
+      - parse_lst
+      #- lst_events
+      #- parse_lgf_dict
+      #- input_logs
     compression: none
     path: /tmp/%Y_%m_%d__%H_%M.json
     encoding:
-       codec: json
+      codec: json
+      #  
