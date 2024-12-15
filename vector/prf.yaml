@@ -29,7 +29,6 @@ transforms:
           if start_str == "\t\t<" then
            
 
-            event.log.priority = string.match(event.log.message, "priority=\"(.-)\"")
             event.log.session_number = string.match(event.log.message, "sessionNumber=\"(.-)\"")
             event.log.user = string.match(event.log.message, "userName=\"(.-)\"")
 
@@ -40,16 +39,26 @@ transforms:
             event.log.operation_uid=operation[event.log.file]["uid"]
             event.log.operation_comment=operation[event.log.file]["comment"]
             event.log.operation_target_value=operation[event.log.file]["target_value"]           
-             
+            event.log.operation_priority=operation[event.log.file]["priority"]           
+            event.log.conf_name=operation[event.log.file]["conf_name"]           
+            event.log.conf_version=operation[event.log.file]["conf_version"]           
+            
             event.log.name = "PRF" 
             event.log.message=""
             emit(event)
           elseif start_str == "\t<p" then
+            comment = string.match(event.log.message, "comment=\"(.-)\"")
+                       
+            conf_name = string.match(comment, "Конф&quot;:&quot;(.-)&quot;")
+            conf_version = string.match(comment, "КонфВер&quot;:&quot;(.-)&quot;")
             operation[event.log.file] = {
+                ["conf_name"] = conf_name,
+                ["conf_version"] = conf_version,
                 ["name"] = string.match(event.log.message, "name=\"(.-)\""),
                 ["uid"] = string.match(event.log.message, "uid=\"(.-)\""),
-                ["comment"] = string.match(event.log.message, "comment=\"(.-)\""),
+                ["comment"] = comment,
                 ["target_value"] = string.match(event.log.message, "targetValue=\"(.-)\""),
+                ["priority"] = string.match(event.log.message, "priority=\"(.-)\"")
             }
 
           elseif start_str == "</p" then
