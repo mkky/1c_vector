@@ -25,5 +25,5 @@ tokens = split(del(.message), "|||")
 .db_type = .data.DBMS
 .server = .data.Srvr
 .comments = .data.Descr
-.db_name_subd = .data.Ref
+.db_name_subd = .data.DB
 .block_rz = tokens[16]
