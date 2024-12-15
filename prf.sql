@@ -1,11 +1,12 @@
 CREATE TABLE SystemService.PRF(
+  db_uid LowCardinality(String),
   operation_target_value Int16, 
   operation_priority Int16,
   file LowCardinality(String),
   conf_name LowCardinality(String),
   conf_version  LowCardinality(String),
   host LowCardinality(String),
-  ts DateTime,
+  ts DateTime('UTC'),
   operation_name LowCardinality(String),
   operation_uid LowCardinality(String),
   session_number UInt32,
