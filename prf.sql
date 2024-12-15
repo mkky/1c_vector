@@ -4,7 +4,7 @@ CREATE TABLE tjournal.PRF(
   ts DateTime,
   operation_name LowCardinality(String),
   operation_uid LowCardinality(String),
-  session_number: UInt32,
+  session_number UInt32,
   time Decimal32(4),
   user LowCardinality(String),
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
