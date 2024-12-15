@@ -11,7 +11,7 @@ import sys
 if len(sys.argv) == 2:
     LOG_PATH = sys.argv[1]
 else:
-    LOG_PATH = "/home/mikhail/Downloads/1c/archive/"
+    LOG_PATH = "/1c/logs/"
 
 LOGS_FILES_PATTERN = LOG_PATH + "**/*.log"
 
@@ -51,7 +51,7 @@ def is_int(s):
 
 
 def get_db_type(column_name, v):
-    if column_name == 'duration':
+    if column_name in ['duration', 'memory', 'memorypeak', 'inbytes','outbytes','cputime']:
         return 'Int64'
     elif column_name in Int32_COLUMNS:
         return 'Int32'
@@ -76,8 +76,8 @@ def get_db_type(column_name, v):
     return None
 
 
-print('DROP DATABASE IF EXISTS tjournal;')
-print('CREATE DATABASE tjournal;\n\n\n\n')
+print('DROP DATABASE IF EXISTS SystemService;')
+print('CREATE DATABASE SystemService;\n\n\n\n')
 
 from collections import defaultdict
 
@@ -128,7 +128,7 @@ for name, json_line in columns.items():
     if name == 'Context':
         continue
 
-    print(f'CREATE TABLE tjournal.{name}(')
+    print(f'CREATE TABLE SystemService.{name}(')
 
     for k, v in json_line.items():
         
@@ -141,7 +141,7 @@ for name, json_line in columns.items():
         print(''') ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);\n\n''')
     elif 'uid' in json_line:
-        print(') ENGINE = ReplacingMergeTree() ORDER BY uid;\n\n')
+        print(') ENGINE = ReplacingMergeTree() ORDER BY (uid, host);\n\n')
     elif 'server' in json_line and 'file' in json_line and 'port' in json_line:
         print(') ENGINE = ReplacingMergeTree() ORDER BY (server, host, port, file);\n\n')
     else:
