@@ -1,10 +1,10 @@
-DROP DATABASE IF EXISTS tjournal;
-CREATE DATABASE tjournal;
+DROP DATABASE IF EXISTS SystemService;
+CREATE DATABASE SystemService;
 
 
 
 
-CREATE TABLE tjournal.LST(
+CREATE TABLE SystemService.LST(
   uid String,
   db_name_1c String,
   comments String,
@@ -18,10 +18,10 @@ CREATE TABLE tjournal.LST(
   block_rz String,
   file String,
   host String,
-) ENGINE = ReplacingMergeTree() ORDER BY uid;
+) ENGINE = ReplacingMergeTree() ORDER BY (uid, host);
 
 
-CREATE TABLE tjournal.SERVERS(
+CREATE TABLE SystemService.SERVERS(
   file String,
   host String,
   port String,
@@ -32,7 +32,7 @@ CREATE TABLE tjournal.SERVERS(
 ) ENGINE = ReplacingMergeTree() ORDER BY (server, host, port, file);
 
 
-CREATE TABLE tjournal.REG(
+CREATE TABLE SystemService.REG(
   ts DateTime64(6,'Europe/Moscow'),
   TransactionStatus String,
   TransactionDate String,
@@ -60,7 +60,7 @@ CREATE TABLE tjournal.REG(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.SCALL(
+CREATE TABLE SystemService.SCALL(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -91,7 +91,7 @@ CREATE TABLE tjournal.SCALL(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.ATTN(
+CREATE TABLE SystemService.ATTN(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -111,7 +111,7 @@ CREATE TABLE tjournal.ATTN(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.CONN(
+CREATE TABLE SystemService.CONN(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -134,7 +134,7 @@ CREATE TABLE tjournal.CONN(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.CALL(
+CREATE TABLE SystemService.CALL(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -153,11 +153,11 @@ CREATE TABLE tjournal.CALL(
   method String,
   callid String,
   mname String,
-  memory Int32,
-  memorypeak Int32,
-  inbytes Int32,
-  outbytes Int32,
-  cputime Int32,
+  memory Int64,
+  memorypeak Int64,
+  inbytes Int64,
+  outbytes Int64,
+  cputime Int64,
   host String,
   context String,
   file String,
@@ -171,7 +171,7 @@ CREATE TABLE tjournal.CALL(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.ADMIN(
+CREATE TABLE SystemService.ADMIN(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -196,7 +196,7 @@ CREATE TABLE tjournal.ADMIN(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.EXCP(
+CREATE TABLE SystemService.EXCP(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -218,7 +218,7 @@ CREATE TABLE tjournal.EXCP(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.CLSTR(
+CREATE TABLE SystemService.CLSTR(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -257,7 +257,7 @@ CREATE TABLE tjournal.CLSTR(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.HASP(
+CREATE TABLE SystemService.HASP(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -280,7 +280,7 @@ CREATE TABLE tjournal.HASP(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.SESN(
+CREATE TABLE SystemService.SESN(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -303,7 +303,7 @@ CREATE TABLE tjournal.SESN(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.SRVC(
+CREATE TABLE SystemService.SRVC(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -322,7 +322,7 @@ CREATE TABLE tjournal.SRVC(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.DBPOSTGRS(
+CREATE TABLE SystemService.DBPOSTGRS(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -355,7 +355,7 @@ CREATE TABLE tjournal.DBPOSTGRS(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.VRSREQUEST(
+CREATE TABLE SystemService.VRSREQUEST(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -379,7 +379,7 @@ CREATE TABLE tjournal.VRSREQUEST(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.SDBL(
+CREATE TABLE SystemService.SDBL(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -410,7 +410,7 @@ CREATE TABLE tjournal.SDBL(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.VRSRESPONSE(
+CREATE TABLE SystemService.VRSRESPONSE(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -434,7 +434,7 @@ CREATE TABLE tjournal.VRSRESPONSE(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.LIC(
+CREATE TABLE SystemService.LIC(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -456,7 +456,7 @@ CREATE TABLE tjournal.LIC(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.TLOCK(
+CREATE TABLE SystemService.TLOCK(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -484,7 +484,7 @@ CREATE TABLE tjournal.TLOCK(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE tjournal.SCOM(
+CREATE TABLE SystemService.SCOM(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -510,7 +510,10 @@ ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 -- ALL EVENTS = ['LST', 'SERVERS', 'REG', 'SCALL', 'ATTN', 'CONN', 'CALL', 'ADMIN', 'EXCP', 'CLSTR', 'HASP', 'Context', 'SESN', 'SRVC', 'DBPOSTGRS', 'VRSREQUEST', 'SDBL', 'VRSRESPONSE', 'LIC', 'TLOCK', 'SCOM']
-CREATE TABLE tjournal.PRF(
+
+
+
+CREATE TABLE SystemService.PRF(
   host LowCardinality(String),
   operation_comment LowCardinality(String),
   ts DateTime,
@@ -520,5 +523,7 @@ CREATE TABLE tjournal.PRF(
   time Decimal32(4),
   user LowCardinality(String),
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts)
+ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
+
+
 

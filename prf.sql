@@ -1,4 +1,4 @@
-CREATE TABLE tjournal.PRF(
+CREATE TABLE SystemService.PRF(
   host LowCardinality(String),
   operation_comment LowCardinality(String),
   ts DateTime,
