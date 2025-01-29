@@ -1,6 +1,6 @@
 CREATE TABLE SystemService.PRF(
   db_uid LowCardinality(String),
-  operation_target_value Int16, 
+  operation_target_value Float, 
   operation_priority Int16,
   file LowCardinality(String),
   conf_name LowCardinality(String),
