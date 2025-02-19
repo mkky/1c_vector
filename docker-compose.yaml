@@ -12,7 +12,7 @@ services:
       - ./envs.sh
 
   vector:
-    image: timberio/vector:latest-alpine
+    image: timberio/vector:latest-debian
     env_file:
       - ./envs.sh
     hostname: vector_techJournal
@@ -21,7 +21,7 @@ services:
     volumes:
       - ./vector:/etc/vector/
     #  - ./fileProgress:/var/lib/vector   ##
-      - ./logs:/var/log/logtj
+      - ./logs:/var/log
       - ./tmp:/tmp
     ports:
       - 8686:8686
