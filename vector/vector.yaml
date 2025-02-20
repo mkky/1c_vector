@@ -75,12 +75,12 @@ transforms:
 
         date_from_file = to_string(split!(split!(.file, "/")[-1], ".")[0])
         log.DateTime, tserr = format_timestamp(parse_timestamp!((date_from_file + to_string(log.DateTime)), "%y%m%d%H%M:%S.%6f"), "%Y-%m-%dT%H:%M:%S.%6f", timezone:"local")
-
+        .message=strip_whitespace!(.message)
         parsed = []
-        if (contains(to_string!(.message), "'")) {
+        if (contains(.message, "'")) {
           parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=\'(?P<val>[^\']*?)\'')
           for_each(parsed) -> |_index, value| {
-            .message=replace!(.message, to_string(value.val), "", count: 1)
+            .message=replace(.message, to_string(value.val), "", count: 1)
           }
           parsed = append(parsed, parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=(?P<val>[^\',][^,]*[^\',])'))
         } else {
@@ -89,7 +89,7 @@ transforms:
         parsed = append(parsed, [ { "key": "ts", "val": log.DateTime }, { "key": "duration", "val": log.duration }, { "key": "name", "val": log.Event }])
 
         .message = encode_json(object_from_array(map_values(parsed) -> |value| { values!(value) }))
-    
+     
 
 
   filter_db_lines_in_lst:
