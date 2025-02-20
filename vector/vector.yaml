@@ -71,25 +71,25 @@ transforms:
       - input_logs_old
     type: remap
     source: |-          
-        
         log = parse_regex!(.message, r'(?P<DateTime>\d{2}:\d{2}\.\d{6})-(?P<duration>\d+),(?P<Event>[a-zA-Z]+),')
 
         date_from_file = to_string(split!(split!(.file, "/")[-1], ".")[0])
-        log.DateTime, tserr = format_timestamp(parse_timestamp!((date_from_file + to_string(log.DateTime)), "%y%m%d%H%M:%S.%6f"), "%FT%T%.6f")
+        log.DateTime, tserr = format_timestamp(parse_timestamp!((date_from_file + to_string(log.DateTime)), "%y%m%d%H%M:%S.%6f"), "%Y-%m-%dT%H:%M:%S.%6f", timezone:"local")
 
         parsed = []
         if (contains(to_string!(.message), "'")) {
-          parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z]+)=\'(?P<val>[^\']*?)\'')
+          parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=\'(?P<val>[^\']*?)\'')
           for_each(parsed) -> |_index, value| {
             .message=replace!(.message, to_string(value.val), "", count: 1)
           }
-          parsed = append(parsed, parse_regex_all!(.message, r',(?P<key>[a-zA-Z]+)=(?P<val>[^\',][^,]*[^\',])'))
+          parsed = append(parsed, parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=(?P<val>[^\',][^,]*[^\',])'))
         } else {
-            parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z]+)=(?P<val>[^,]*)')
+            parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=(?P<val>[^,]*)')
         }
         parsed = append(parsed, [ { "key": "ts", "val": log.DateTime }, { "key": "duration", "val": log.duration }, { "key": "name", "val": log.Event }])
 
         .message = encode_json(object_from_array(map_values(parsed) -> |value| { values!(value) }))
+    
 
 
   filter_db_lines_in_lst:
@@ -211,3 +211,4 @@ sinks:
     encoding:
       codec: json
       #  
+
