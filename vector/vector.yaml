@@ -13,7 +13,7 @@ sources:
       timeout_ms: 1000
       mode: halt_before
       start_pattern: ""
-      condition_pattern: "[0-5]{1}\\d:[0-5]{1}\\d.\\d{6}"
+      condition_pattern: "[0-5]{1}\\d:[0-5]{1}\\d\\.\\d{6}\\-"
 
   input_logs:
     type: file
@@ -78,11 +78,18 @@ transforms:
         .message=strip_whitespace!(.message)
         parsed = []
         if (contains(.message, "'")) {
-          parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=\'(?P<val>[^\']*?)\'')
+           parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=\'(?P<val>[^\']*?)\'')
           for_each(parsed) -> |_index, value| {
             .message=replace(.message, to_string(value.val), "", count: 1)
           }
-          parsed = append(parsed, parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=(?P<val>[^\',][^,]*[^\',])'))
+
+          parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)="(?P<val>[^"]*?)"')
+          for_each(parsed) -> |_index, value| {
+            .message=replace(.message, to_string(value.val), "", count: 1)
+          }
+
+
+          parsed = append(parsed, parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=(?P<val>[^\',"][^,]*[^\',"])'))
         } else {
             parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=(?P<val>[^,]*)')
         }
@@ -132,7 +139,7 @@ transforms:
 
   remap_logs:
     inputs:
-      #- input_logs
+      - input_logs
       - old_logs_to_json_str
     type: remap
     file: /etc/vector/transforms/parseLog.vrl
@@ -202,10 +209,10 @@ sinks:
     type: file
     inputs:
       #- filter_EVENT_LIST
-      - parse_lst
+      #- parse_lst
       #- lst_events
       #- parse_lgf_dict
-      # - old_logs_to_json_str
+      - old_logs_to_json_str
     compression: none
     path: /tmp/%Y_%m_%d__%H_%M.json
     encoding:
