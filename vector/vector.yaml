@@ -83,7 +83,7 @@ transforms:
             .message=replace(.message, to_string(value.val), "", count: 1)
           }
 
-          parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)="(?P<val>[^"]*?)"')
+          parsed = append(parsed, parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)="(?P<val>[^"]*?)"'))
           for_each(parsed) -> |_index, value| {
             .message=replace(.message, to_string(value.val), "", count: 1)
           }
