@@ -374,23 +374,8 @@ function process (event, emit)
         end
 
      -------------------------------- DATA -----------------------------------
-
-        -- Универсальная обработка поля Data
-        if event.log.Data and event.log.Data ~= "" then
-          -- Удаляем внешние фигурные скобки
-          local inner_content = string.match(event.log.Data, '^{(.*)}$')
-          if inner_content then
-            -- Проверяем есть ли запятая (означает наличие данных после типа)
-            local data_part = string.match(inner_content, '^"[^"]*",%s*(.+)$')
-            if data_part then
-              -- Есть данные после запятой - используем их и удаляем кавычки
-              event.log.Data = data_part:gsub('"','')
-            else
-              -- Только тип в кавычках (например "U", "I", "E") - делаем пустым
-              event.log.Data = ""
-            end
-          end
-        end
+        -- берём первое значение в данных 
+        event.log.Data = (event.log.Data and string.match(event.log.Data, '{"%w","([^"]+)"}')) or ""
 
      --------------- TRANSACTION DATE, TRANSACTION NUMBER --------------------
 
