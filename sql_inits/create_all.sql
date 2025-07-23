@@ -1,10 +1,11 @@
-DROP DATABASE IF EXISTS SystemService;
-CREATE DATABASE SystemService;
+--DROP DATABASE IF EXISTS BIT;
+--CREATE DATABASE BIT;
+
+-- Создайте базу данных если её нет
+CREATE DATABASE IF NOT EXISTS BIT;
 
 
-
-
-CREATE TABLE SystemService.LST(
+CREATE TABLE BIT.LST(
   uid String,
   db_name_1c String,
   comments String,
@@ -21,7 +22,7 @@ CREATE TABLE SystemService.LST(
 ) ENGINE = ReplacingMergeTree() ORDER BY (uid, host);
 
 
-CREATE TABLE SystemService.SERVERS(
+CREATE TABLE BIT.SERVERS(
   file String,
   host String,
   port String,
@@ -32,35 +33,45 @@ CREATE TABLE SystemService.SERVERS(
 ) ENGINE = ReplacingMergeTree() ORDER BY (server, host, port, file);
 
 
-CREATE TABLE SystemService.REG(
-  ts DateTime64(6,'Europe/Moscow'),
-  TransactionStatus String,
-  TransactionDate String,
-  TransactionNumber Int32,
-  User String,
-  UserUuid String,
-  Computer String,
-  Application String,
-  Connection Int32,
-  Event String,
-  Severity String,
-  Comment String,
-  Metadata String,
-  MetadataUuid String,
-  Data String,
-  DataPresentation String,
-  Server String,
-  MainPort UInt16,
-  AddPort UInt16,
-  Session Int32,
-  file String,
-  host String,
-  db_uid String,
-) ENGINE = MergeTree() PARTITION BY toYYYYMM(ts)
-ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
+
+-- Создайте таблицу
+CREATE TABLE BIT.JOURNAL_REG
+(
+    `DateTime` DateTime('UTC') CODEC(Delta(4), LZ4),
+    `TransactionStatus` LowCardinality(String),
+    `TransactionDate` DateTime('UTC') CODEC(Delta(4), LZ4),
+    `TransactionNumber` UInt64 CODEC(Delta(4), LZ4),
+    `UserUuid` String CODEC(LZ4),
+    `User` String CODEC(ZSTD(9)),
+    `Computer` String CODEC(ZSTD(9)),
+    `Application` LowCardinality(String),
+    `Connection` UInt32 CODEC(DoubleDelta, LZ4),
+    `Event` LowCardinality(String),
+    `Severity` LowCardinality(String),
+    `Comment` String CODEC(ZSTD(19)),
+    `MetadataUuid` String CODEC(LZ4),
+    `Metadata` String CODEC(ZSTD(19)),
+    `Data` String CODEC(ZSTD(19)),
+    `DataPresentation` String CODEC(ZSTD(19)),
+    `Server` LowCardinality(String),
+    `MainPort` UInt16 CODEC(DoubleDelta, LZ4),
+    `AddPort` UInt16 CODEC(DoubleDelta, LZ4),
+    `Session` UInt32 CODEC(DoubleDelta, LZ4),
+    `db_uid` LowCardinality(String),
+    `host` LowCardinality(String),
+    `FileName` String CODEC(ZSTD(9)),
+    `date` Date MATERIALIZED toDate(DateTime)
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(DateTime)
+ORDER BY (DateTime, Severity, Event, TransactionNumber)
+--TTL DateTime + toIntervalMonth(1) TO VOLUME 'cold_volume',
+ --   DateTime + toIntervalYear(1)
+SETTINGS index_granularity = 8192 --, storage_policy = 'tiered'
+COMMENT 'Журнал регистрации событий 1С';
 
 
-CREATE TABLE SystemService.SCALL(
+CREATE TABLE BIT.SCALL(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -91,7 +102,7 @@ CREATE TABLE SystemService.SCALL(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.ATTN(
+CREATE TABLE BIT.ATTN(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -111,7 +122,7 @@ CREATE TABLE SystemService.ATTN(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.CONN(
+CREATE TABLE BIT.CONN(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -134,7 +145,7 @@ CREATE TABLE SystemService.CONN(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.CALL(
+CREATE TABLE BIT.CALL(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -171,7 +182,7 @@ CREATE TABLE SystemService.CALL(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.ADMIN(
+CREATE TABLE BIT.ADMIN(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -196,7 +207,7 @@ CREATE TABLE SystemService.ADMIN(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.EXCP(
+CREATE TABLE BIT.EXCP(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -218,7 +229,7 @@ CREATE TABLE SystemService.EXCP(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.CLSTR(
+CREATE TABLE BIT.CLSTR(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -257,7 +268,7 @@ CREATE TABLE SystemService.CLSTR(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.HASP(
+CREATE TABLE BIT.HASP(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -280,7 +291,7 @@ CREATE TABLE SystemService.HASP(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.SESN(
+CREATE TABLE BIT.SESN(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -303,7 +314,7 @@ CREATE TABLE SystemService.SESN(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.SRVC(
+CREATE TABLE BIT.SRVC(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -322,7 +333,7 @@ CREATE TABLE SystemService.SRVC(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.DBPOSTGRS(
+CREATE TABLE BIT.DBPOSTGRS(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -355,7 +366,7 @@ CREATE TABLE SystemService.DBPOSTGRS(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.VRSREQUEST(
+CREATE TABLE BIT.VRSREQUEST(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -379,7 +390,7 @@ CREATE TABLE SystemService.VRSREQUEST(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.SDBL(
+CREATE TABLE BIT.SDBL(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -410,7 +421,7 @@ CREATE TABLE SystemService.SDBL(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.VRSRESPONSE(
+CREATE TABLE BIT.VRSRESPONSE(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -434,7 +445,7 @@ CREATE TABLE SystemService.VRSRESPONSE(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.LIC(
+CREATE TABLE BIT.LIC(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -456,7 +467,7 @@ CREATE TABLE SystemService.LIC(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.TLOCK(
+CREATE TABLE BIT.TLOCK(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -484,7 +495,7 @@ CREATE TABLE SystemService.TLOCK(
 ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
-CREATE TABLE SystemService.SCOM(
+CREATE TABLE BIT.SCOM(
   ts DateTime64(6,'Europe/Moscow'),
   duration Int64,
   name String,
@@ -515,7 +526,7 @@ ORDER BY (ts) TTL toDateTime(ts) + toIntervalDay(30);
 
 
 
-CREATE TABLE SystemService.PRF(
+CREATE TABLE BIT.PRF(
   db_uid LowCardinality(String),
   operation_target_value Float,
   operation_priority Int16,

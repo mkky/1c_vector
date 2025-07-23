@@ -11,7 +11,7 @@ if err != null {
 # Восстанавливаем информацию о файле после парсинга
 .FilePath = file_path
 .FileName = file_name
-.name = "JOURNAL_REG1"
+.name = "JOURNAL_REG"
 .host = get_hostname!()
 ts_format = "%Y-%m-%dT%H:%M:%S"
 
