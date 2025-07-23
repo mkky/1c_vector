@@ -1,6 +1,6 @@
 lines=split!(.message, "\n")
 
-.events = []
+events = []
 for_each(split!(.message, "\n", 12)) -> |_index, value| {
 
   server = parse_regex(value, r'\{"(?P<server>[^\s,"]+)",(?P<port>\d+)\},?\r') ?? {}
@@ -12,20 +12,17 @@ for_each(split!(.message, "\n", 12)) -> |_index, value| {
     for_each(msgs) -> |_i, m| {
         if match(m, range_ports_regex)  {
              #server.prev_value = prev_value
+             server = merge(server, .)
              server = merge(server, parse_regex(prev_value , r'",(?P<rport>\d+),"$') ?? {"rport": ""})
              server = merge(server, parse_regex!(m, range_ports_regex))
+             server.name="SERVERS"
         }
         prev_value = m
     }
-
-    .events = append(.events, [server])
-
+    events = push(events, server)
   }
-
 }
 
+. = events
 
 
-
-.name="SERVERS"
-del(.message)

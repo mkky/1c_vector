@@ -80,26 +80,7 @@ transforms:
     type: remap
     file: /etc/vector/transforms/parseLstAll.vrl
 
-# Lua-трансформация для событий из parse_lst_all
-  lst_events:
-    type: lua
-    inputs:
-       - parse_lst_all
-    version: "2"
-    hooks:
-      process: |-
-        function (event, emit)
-          events = event.log.events
-          for _,e in pairs(events) do
-            event.log.events = nil
 
-            for k,v in pairs(e) do
-              event.log[k]=v
-            end
-            emit(event)
-
-          end
-        end
 
 # Преобразование lst_file через VRL-скрипт
   parse_lst:
@@ -134,7 +115,7 @@ sinks:
     type: clickhouse
     inputs:
       - parse_lst
-      - lst_events
+      - parse_lst_all
       - parse_lgf_dict
 
     endpoint: ${CLICKHOUSE_SERVER}
