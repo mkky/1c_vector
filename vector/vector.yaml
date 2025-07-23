@@ -1,32 +1,31 @@
+# Устанавливаем временную зону
 timezone: Europe/Moscow
+
+# Включаем API Vector
 api:
   enabled: true
+
 sources:
-  input_logs_old:
-    type: file
-    include:
-      - /var/log/logs_old/**/*.log
-    data_dir: /var/lib/vector
-    fingerprint:
-      strategy: device_and_inode
-    multiline:
-      timeout_ms: 1000
-      mode: halt_before
-      start_pattern: ""
-      condition_pattern: "[0-5]{1}\\d:[0-5]{1}\\d\\.\\d{6}\\-"
+# Сбор метрик хоста (CPU, память, диски и т.д.)
+  host_metrics:
+    type: host_metrics
+    collectors: ["cpu", "memory", "disk", "network", "filesystem", "load", "host", "process"]
+    namespace: "node"
+    disk:
+      devices:
+        excludes: ["loop*"]
+    filesystem:
+      mountpoints:
+        excludes: ["/sys/*","/run/*","/sys","/run","/dev","/dev/*","/proc","/proc/*","/boot/*","/parsecfs","/boot", "/var/lib/docker/overlay2/*"]
+    process:
+      processes:
+        includes: ["linep", "klnagent", "kesl"]
 
-  input_logs:
-    type: file
-    include:
-      - /var/log/logtj/**/*.log
-    data_dir: /var/lib/vector
-    fingerprint:
-      strategy: device_and_inode
-
+# Источник для чтения файлов .lst (список баз)
   lst_file:
     type: file
     include:
-      - /var/log/logtj/*.lst
+      - ${vector_cluster_path:-/var/log/}/**/1CV8Clst.lst
     data_dir: /var/lib/vector
     fingerprint:
       strategy: device_and_inode
@@ -36,25 +35,25 @@ sources:
       start_pattern: "\\{[a-z\\d]{8}"
       timeout_ms: 1000
 
-
+# Источник для чтения всех .lst файлов (режим парсинга портов)
   lst_all:
     type: file
     include:
-      - /var/log/logtj/*.lst
+      - ${vector_cluster_path:-/var/log/}/**/1CV8Clst.lst
     data_dir: /var/lib/vector
     fingerprint:
       strategy: device_and_inode
     multiline:
       condition_pattern: "\\}\\s*\\{"
-      mode: halt_before 
+      mode: halt_before
       start_pattern: "\\{0,\\r"
       timeout_ms: 1000
 
-
+# Источник для чтения журналов регистрации.lgp
   lgp_logs:
     type: file
     include:
-      - /var/log/logtj/**/*.lgp
+      - ${vector_cluster_path:-/var/log/}/**/**/1Cv8Log/*.lgp
     data_dir: /var/lib/vector
     fingerprint:
       strategy: device_and_inode
@@ -66,51 +65,22 @@ sources:
 
 
 transforms:
-  old_logs_to_json_str:
-    inputs:
-      - input_logs_old
-    type: remap
-    source: |-          
-        log = parse_regex!(.message, r'(?P<DateTime>\d{2}:\d{2}\.\d{6})-(?P<duration>\d+),(?P<Event>[a-zA-Z]+),')
 
-        date_from_file = to_string(split!(split!(.file, "/")[-1], ".")[0])
-        log.DateTime, tserr = format_timestamp(parse_timestamp!((date_from_file + to_string(log.DateTime)), "%y%m%d%H%M:%S.%6f"), "%Y-%m-%dT%H:%M:%S.%6f", timezone:"local")
-        .message=strip_whitespace!(.message)
-        parsed = []
-        if (contains(.message, "'")) {
-           parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=\'(?P<val>[^\']*?)\'')
-          for_each(parsed) -> |_index, value| {
-            .message=replace(.message, to_string(value.val), "", count: 1)
-          }
-
-          parsed = append(parsed, parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)="(?P<val>[^"]*?)"'))
-          for_each(parsed) -> |_index, value| {
-            .message=replace(.message, to_string(value.val), "", count: 1)
-          }
-
-
-          parsed = append(parsed, parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=(?P<val>[^\',"][^,]*[^\',"])'))
-        } else {
-            parsed = parse_regex_all!(.message, r',(?P<key>[a-zA-Z\:]+)=(?P<val>[^,]*)')
-        }
-        parsed = append(parsed, [ { "key": "ts", "val": log.DateTime }, { "key": "duration", "val": log.duration }, { "key": "name", "val": log.Event }])
-
-        .message = encode_json(object_from_array(map_values(parsed) -> |value| { values!(value) }))
-     
-
-
+# Фильтр: пропускает только строки, содержащие ";DBUID="
   filter_db_lines_in_lst:
     inputs:
       - lst_file
     type: filter
     condition: contains( to_string!(.message), ";DBUID=")
-  
+
+# Преобразование lst_all через VRL-скрипт
   parse_lst_all:
     inputs:
       - lst_all
     type: remap
     file: /etc/vector/transforms/parseLstAll.vrl
 
+# Lua-трансформация для событий из parse_lst_all
   lst_events:
     type: lua
     inputs:
@@ -122,49 +92,30 @@ transforms:
           events = event.log.events
           for _,e in pairs(events) do
             event.log.events = nil
-            
+
             for k,v in pairs(e) do
               event.log[k]=v
             end
             emit(event)
 
           end
-        end      
+        end
 
+# Преобразование lst_file через VRL-скрипт
   parse_lst:
     inputs:
       - filter_db_lines_in_lst
     type: remap
     file: /etc/vector/transforms/parseLst.vrl
 
-  remap_logs:
-    inputs:
-      - input_logs
-      - old_logs_to_json_str
-    type: remap
-    file: /etc/vector/transforms/parseLog.vrl
-
-  add_context_event:
-    inputs:
-      - remap_logs
-    type: reduce
-    starts_when:
-      type: vrl
-      source: .name != "Context"
-
-
-  filter_EVENT_LIST:
-    inputs:
-      - add_context_event
-    type: filter
-    condition: includes(split("${EVENT_LIST}", ","), to_string!(.name))
-
+# Преобразование lgp_logs через VRL-скрипт
   parse_lgp:
     inputs:
       - lgp_logs
     type: remap
     file: /etc/vector/transforms/parseLgp.vrl
 
+# Lua-трансформация для parse_lgp
   parse_lgf_dict:
     type: lua
     version: "2"
@@ -176,18 +127,16 @@ transforms:
       init: init
       process: process
       shutdown: shutdown
-      #timers:
-      #- interval_seconds: 1
-      # handler: timer_handler
+
 sinks:
+# Выгрузка данных в ClickHouse
   clickhouse:
     type: clickhouse
     inputs:
-      - filter_EVENT_LIST
       - parse_lst
       - lst_events
       - parse_lgf_dict
-      #- parse_lgp
+
     endpoint: ${CLICKHOUSE_SERVER}
     auth:
       strategy: basic
@@ -202,20 +151,10 @@ sinks:
     acknowledgements:
       enabled: true
 
-
- ## Пишем данные, которую фильтруются в БД еще и в json файлы в ./tmp/
-
-  json_log_to_tmp_folder:
-    type: file
+# Экспорт метрик в Prometheus
+  prometheus_exporter:
+    type: prometheus_exporter
     inputs:
-      #- filter_EVENT_LIST
-      #- parse_lst
-      #- lst_events
-      #- parse_lgf_dict
-      - old_logs_to_json_str
-    compression: none
-    path: /tmp/%Y_%m_%d__%H_%M.json
-    encoding:
-      codec: json
-      #  
+      - host_metrics
+    address: "0.0.0.0:9598"
 
