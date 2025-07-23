@@ -5,6 +5,7 @@ parsed, err = parse_regex(.message, r'\{(?P<DateTimeRaw>\d{14}),(?P<TransactionS
 if err != null {
   abort
 }
+
 . = merge(., parsed)
 .name = "JOURNAL_REG"
 ts_format = "%Y-%m-%dT%H:%M:%S"

@@ -91,6 +91,7 @@ transforms:
 
 # Преобразование lgp_logs через VRL-скрипт
   parse_lgp:
+    reroute_dropped: true
     inputs:
       - lgp_logs
     type: remap
@@ -110,6 +111,14 @@ transforms:
       shutdown: shutdown
 
 sinks:
+  d:
+    type: file
+    inputs:
+      - parse_lgp.dropped
+    encoding:
+       codec: json
+    path: /tmp/dropped.log
+
 # Выгрузка данных в ClickHouse
   clickhouse:
     type: clickhouse
