@@ -1,20 +1,13 @@
-# Сохраняем информацию о файле перед парсингом
-file_path = to_string(.file) ?? "unknown"
-file_name = replace!(file_path, r'.*[\\/]([^\\/]+)$', "$1")
+.FilePath = to_string(.file) ?? "unknown"
+.FileName = split(.FilePath, "/")[-1]
 
-., err = parse_regex(.message, r'\{(?P<DateTimeRaw>\d{14}),(?P<TransactionStatus>\w),\s+\{(?P<TransactionDate>.+?)\},(?P<User>\d+),(?P<Computer>\d+),(?P<Application>\d+),(?P<Connection>\d+),(?P<Event>\d+),(?P<Severity>\w),"(?P<Comment>[\s\S]*?)",(?P<Metadata>\d+),\s+(?P<Data>[\s\S]+?\}),"(?P<DataPresentation>.*?)",(?P<Server>\d+),(?P<MainPort>\d+),(?P<AddPort>\d+),(?P<Session>\d+)', numeric_groups: false)
-
+parsed, err = parse_regex(.message, r'\{(?P<DateTimeRaw>\d{14}),(?P<TransactionStatus>\w),\s+\{(?P<TransactionDate>.+?)\},(?P<User>\d+),(?P<Computer>\d+),(?P<Application>\d+),(?P<Connection>\d+),(?P<Event>\d+),(?P<Severity>\w),"(?P<Comment>[\s\S]*?)",(?P<Metadata>\d+),\s+(?P<Data>[\s\S]+?\}),"(?P<DataPresentation>.*?)",(?P<Server>\d+),(?P<MainPort>\d+),(?P<AddPort>\d+),(?P<Session>\d+)', numeric_groups: false)
 if err != null {
   abort
 }
-
-# Восстанавливаем информацию о файле после парсинга
-.FilePath = file_path
-.FileName = file_name
+. = merge(., parsed)
 .name = "JOURNAL_REG"
-.host = get_hostname!()
 ts_format = "%Y-%m-%dT%H:%M:%S"
-
-. = merge(., parse_regex!(file_path, r'(?P<db_uid>\w{8}\-\w{4}-\w{4}-\w{4}-\w{12})'))
+. = merge(., parse_regex!(.FilePath, r'(?P<db_uid>\w{8}\-\w{4}-\w{4}-\w{4}-\w{12})'))
 .DateTime =format_timestamp!(parse_timestamp!(.DateTimeRaw, "%Y%m%d%H%M%S"), ts_format, timezone:"UTC")
-.err = err
+
