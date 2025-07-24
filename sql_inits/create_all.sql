@@ -60,7 +60,9 @@ CREATE TABLE BIT.JOURNAL_REG
     `db_uid` LowCardinality(String),
     `host` LowCardinality(String),
     `FileName` String CODEC(ZSTD(9)),
-    `date` Date MATERIALIZED toDate(DateTime)
+    `date` Date MATERIALIZED toDate(DateTime),
+	`db_name` LowCardinality(String),
+	`db_ref` LowCardinality(String)
 )
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(DateTime)

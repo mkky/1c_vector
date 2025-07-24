@@ -63,7 +63,6 @@ sources:
       start_pattern: ""
       timeout_ms: 1000
 
-
 transforms:
 
 # Фильтр: пропускает только строки, содержащие ";DBUID="
@@ -117,7 +116,8 @@ sinks:
       - parse_lgp.dropped
     encoding:
        codec: json
-    path: /tmp/dropped.log
+    path: /tmp/dropped_{{ .host }}.log
+
 
 # Выгрузка данных в ClickHouse
   clickhouse:
@@ -147,4 +147,15 @@ sinks:
     inputs:
       - host_metrics
     address: "0.0.0.0:9598"
+    
+enrichment_tables:
+  ibases:
+    type: file
+    file:
+      path: "${vector_cluster_path:-/var/log/}/dict_ibases.csv"
+      encoding:
+        type: "csv"
+    schema:
+      ID: "string"
+      name: "string"    
 
