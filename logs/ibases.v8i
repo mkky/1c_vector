@@ -1,0 +1,12 @@
+﻿[1C:Документооборот 8 КОРП]
+Connect=File="C:\Users\user\Documents\1C\DocMngCorp";
+ID=abcd1234-ab34-ab34-ab34-ab34ab34ab34
+OrderInList=16640
+Folder=/
+OrderInTree=16640
+External=0
+ClientConnectionSpeed=Normal
+App=Auto
+WA=1
+Version=8.3
+DisableLocalSpeechToText=0
