@@ -1,0 +1,164 @@
+# Устанавливаем временную зону
+timezone: Europe/Moscow
+
+# Включаем API Vector
+# api:
+  # enabled: true
+
+sources:
+# Сбор метрик хоста (CPU, память, диски и т.д.)
+  # host_metrics:
+    # type: host_metrics
+    # collectors: ["cpu", "memory", "disk", "network", "filesystem", "load", "host", "process"]
+    # namespace: "node"
+    # disk:
+      # devices:
+        # excludes: ["loop*"]
+    # filesystem:
+      # mountpoints:
+        # excludes: ["/sys/*","/run/*","/sys","/run","/dev","/dev/*","/proc","/proc/*","/boot/*","/parsecfs","/boot", "/var/lib/docker/overlay2/*"]
+    # process:
+      # processes:
+        # includes: ["linep", "klnagent", "kesl"]
+
+# Источник для чтения файлов .lst (список баз)
+  lst_file:
+    type: file
+    include:
+      - ${vector_cluster_path:-/var/log/}/**/1CV8Clst.lst
+    data_dir:  ${vector_cluster_path:-/var/lib/}vector/
+    fingerprint:
+      strategy: device_and_inode
+    multiline:
+      condition_pattern: "\\},\\r"
+      mode: halt_with
+      start_pattern: "\\{[a-z\\d]{8}"
+      timeout_ms: 1000
+
+# Источник для чтения всех .lst файлов (режим парсинга портов)
+  lst_all:
+    type: file
+    include:
+      - ${vector_cluster_path:-/var/log/}/**/1CV8Clst.lst
+    data_dir:  ${vector_cluster_path:-/var/lib/}vector/
+    fingerprint:
+      strategy: device_and_inode
+    multiline:
+      condition_pattern: "\\}\\s*\\{"
+      mode: halt_before
+      start_pattern: "\\{0,\\r"
+      timeout_ms: 1000
+
+# Источник для чтения журналов регистрации.lgp
+  lgp_logs:
+    type: file
+    include:
+      - ${vector_cluster_path:-/var/log/}/**/**/1Cv8Log/*.lgp
+    data_dir: ${vector_cluster_path:-/var/lib/}vector/
+    fingerprint:
+      strategy: device_and_inode
+    multiline:
+      condition_pattern: "\\{\\d{14},\\w,"
+      mode: halt_before
+      start_pattern: ""
+      timeout_ms: 1000
+
+transforms:
+
+# Фильтр: пропускает только строки, содержащие ";DBUID="
+  filter_db_lines_in_lst:
+    inputs:
+      - lst_file
+    type: filter
+    condition: contains( to_string!(.message), ";DBUID=")
+
+# Преобразование lst_all через VRL-скрипт
+  parse_lst_all:
+    inputs:
+      - lst_all
+    type: remap
+    file: /etc/vector/transforms/parseLstAll.vrl
+
+
+
+# Преобразование lst_file через VRL-скрипт
+  parse_lst:
+    inputs:
+      - filter_db_lines_in_lst
+    type: remap
+    file: /etc/vector/transforms/parseLst.vrl
+
+# Преобразование lgp_logs через VRL-скрипт
+  parse_lgp:
+    reroute_dropped: true
+    inputs:
+      - lgp_logs
+    type: remap
+    file: /etc/vector/transforms/parseLgp.vrl
+
+# Lua-трансформация для parse_lgp
+  # parse_lgf_dict:
+    # type: lua
+    # version: "2"
+    # inputs:
+      # - parse_lgp
+    # source: |-
+      # require 'transform'
+    # hooks:
+      # init: init
+      # process: process
+      # shutdown: shutdown
+
+sinks:
+  d:
+    type: file
+    inputs:
+      # - parse_lgp.dropped
+      - parse_lgp
+      # - parse_lgf_dict
+    encoding:
+       codec: json
+    path: /tmp/dropped_{{ .host }}.log
+
+
+
+  # clickhouse:
+    # type: clickhouse
+    # inputs:
+      # - parse_lst
+      # - parse_lst_all
+      # - parse_lgp
+      # - parse_lgf_dict
+
+    # endpoint: ${CLICKHOUSE_SERVER}
+    # auth:
+      # strategy: basic
+      # user: ${CLICKHOUSE_USER}
+      # password: ${CLICKHOUSE_PASSWORD}
+    # database: ${CLICKHOUSE_DATABASE}
+    # skip_unknown_fields: true
+    # table: "{{ .name }}"
+    # batch:
+      # max_events: 10000
+      # timeout_secs: 5
+    # acknowledgements:
+      # enabled: true
+
+
+  # prometheus_exporter:
+    # type: prometheus_exporter
+    # inputs:
+      # - host_metrics
+    # address: "0.0.0.0:9598"
+    
+enrichment_tables:
+  ibases:
+    type: file
+    file:
+      path: "${vector_cluster_path:-/var/log/}/dict_ibases.csv"
+      encoding:
+        type: "csv"
+    schema:
+      ID: "string"
+      name: "string"    
+
