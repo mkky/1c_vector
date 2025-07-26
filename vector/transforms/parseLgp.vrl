@@ -45,15 +45,16 @@ for_each(keys(enrich_map)) -> |_idx, field| {
   idVal     = to_string(get!(., [field])) ?? ""  # исходный числовой ID
   
   if idVal != "" {
-    rec, err = get_enrichment_table_record("lgf",
+    records, err = find_enrichment_table_records("lgf",
       {
         "type":   typeName,
         "db_uid": .db_uid,
         "id":     idVal,
       }
     )
-    if err == null {
+    if err == null && length(records) > 0 {
       # Вставляем вместо числа всю запись из lgf.csv
+	  rec = records[-1]
       . = set!(., [field], rec.value)
 	  
 	  if includes(["Metadata", "User"], field) {
