@@ -39,29 +39,48 @@ enrich_map = {
   "MainPort":    "ports",
   "AddPort":     "portsAdd",
 }
-
+if .Metadata == "0" {
+ .Metadata = ""
+ }
+ if .Computer == "0" {
+ .Computer = ""
+ }
+  if .Application == "0" {
+ .Application = ""
+ }
+  if .Event == "0" {
+ .Event = ""
+ }
+ if .Server == "0" {
+ .Server = ""
+ }
+ if .User == "0" {
+ .User = ""
+ }
+ 
 for_each(keys(enrich_map)) -> |_idx, field| {
   typeName = get!(enrich_map, [field])       # e.g. "users"
   idVal     = to_string(get!(., [field])) ?? ""  # исходный числовой ID
   
   if idVal != "" {
-    records, err = find_enrichment_table_records("lgf",
+    
+       records, err = find_enrichment_table_records("lgf",
       {
         "type":   typeName,
         "db_uid": .db_uid,
         "id":     idVal,
-      }
-    )
-    if err == null && length(records) > 0 {
-      # Вставляем вместо числа всю запись из lgf.csv
-	  rec = records[-1]
-      . = set!(., [field], rec.value)
-	  
-	  if includes(["Metadata", "User"], field) {
-	    . = set!(., [field + "Uuid"], rec.uuid)
-	  }
-
-    }
+       }
+       )
+       if err == null && length(records) > 0 {
+         # Вставляем вместо числа всю запись из lgf.csv
+	     rec = records[-1]
+	   
+         . = set!(., [field], rec.value)
+	   
+	     if includes(["Metadata", "User"], field) {
+	     . = set!(., [field + "Uuid"], rec.uuid)
+	     }
+	   }
   }
 }
 
