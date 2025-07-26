@@ -1,0 +1,5 @@
+name,Connect,OrderInList,OrderInTree,ClientConnectionSpeed,App,WA,Version,DisableLocalSpeechToText,source_file,Connect_File,ID,Folder,External,Connect_Ref,Connect_Srvr
+1C:Документооборот 8 КОРП,"File=""C:\Users\user\Documents\1C\DocMngCorp"";",16640,16640,Normal,Auto,1,8.3,0,ibases.v8i,C:\Users\user\Documents\1C\DocMngCorp,abcd1234-ab34-ab34-ab34-ab34ab34ab34,/,0,,
+monitor__1c,"Srvr=""dev-server:35"";Ref=""monitor1c"";",16384,256,Normal,Auto,1,8.3,0,ibases_2.v8i,,abcd1234-ab34-ab34-ab34-ab34ab34ab33,/,0,monitor1c,dev-server:35
+Пример,"File=""C:\Пример"";",16640,16640,Normal,Auto,1,8.3,0,ibases_2.v8i,C:\Пример,ef99-ef99-ef99-ef99-ef99ef99ef99,/,0,,
+shops,"Srvr=""O2-1C-01"";Ref=""shops_central2"";",16896,33024,Normal,Auto,1,8.3,0,ibases_2.v8i,,cc16cc16-cc16-cc16-cc16-cc16cc16cc16,/,0,shops_central2,O2-1C-01
